@@ -1,0 +1,8 @@
+# Install planetaryimage itself
+-e .
+
+# Install our development requirements
+flake8
+pytest
+tox
+wheel==0.23.0
