@@ -1,8 +1,9 @@
-from image import PlanteraryImage
+# -*- coding: utf-8 -*-
+from image import PlanetaryImage
 import numpy
 
 
-class PDS3Image(PlanteraryImage):
+class PDS3Image(PlanetaryImage):
     """ A PDS3 image reader. """
 
     PIXEL_TYPES = {
