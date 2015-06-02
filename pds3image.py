@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from image import PlanetaryImage
+from pvl._collections import Units
 import numpy
+import six
 
 
 class PDS3Image(PlanetaryImage):
+
     """ A PDS3 image reader. """
 
     PIXEL_TYPES = {
@@ -41,7 +44,22 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def start_byte(self):
-        return self.label['^IMAGE'] - 1
+        """Pointer types that are currently implemented are
+            ^IMAGE = nnn
+            ^IMAGE = nnn <BYTES>
+        """
+        pointer = self.label['^IMAGE']
+        if isinstance(pointer, six.integer_types):
+            return pointer - 1
+        elif isinstance(pointer, Units):
+            if pointer.units == 'BYTES':
+                return pointer.value
+            else:
+                raise ValueError(
+                    'Expected <BYTES> as image pointer units but found (%s)'
+                    % pointer.units)
+        else:
+            raise ValueError('Unsupported image pointer type')
 
     @property
     def pixel_type(self):
