@@ -35,6 +35,13 @@ class PDS3Image(PlanetaryImage):
         super(PDS3Image, self).__init__(*args, **kwargs)
 
     @property
+    def format(self):
+        try:
+            return self.get_nested_dict(self.label, self.LABEL_MAPPING['format'])
+        except KeyError:
+            return 'BAND_SEQUENTIAL'
+
+    @property
     def byte_order(self):
         sample_type = self.get_nested_dict(self.label, self.LABEL_MAPPING['sample_type'])
         if "LSB" in sample_type:
