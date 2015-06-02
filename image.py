@@ -1,5 +1,7 @@
 from six import string_types
 from pvl import load as load_label
+import numpy
+
 try:
     # Python 3 moved reduce to the functools module
     from functools import reduce
@@ -10,22 +12,15 @@ except ImportError:
 
 class PlanteraryImage(object):
     """A generic image reader. """
-    
-    PIXEL_TYPES = {
-        'UnsignedByte': numpy.dtype('uint8'),
-        'SignedByte': numpy.dtype('int8'),
-        'UnsignedWord': numpy.dtype('uint16'),
-        'SignedWord': numpy.dtype('int16'),
-        'UnsignedInteger': numpy.dtype('uint32'),
-        'SignedInteger': numpy.dtype('int32'),
-        'Real': numpy.dtype('float32'),
-        'Double': numpy.dtype('float64')
+
+    BAND_STORAGE_TYPE = {
+        'BAND_SEQUENTIAL': '_band_sequential'
     }
 
     @classmethod
     def open(cls, filename):
         """ Read an image file from disk
-        
+
         :param filename: name of file to read as an image file
         """
         with open(filename, 'rb') as fp:
@@ -50,14 +45,14 @@ class PlanteraryImage(object):
 
         #: The parsed label header in dictionary form.
         self.label = self._parse_label(stream)
-        
+
         #: A numpy array representing the image
         self.image = self._parse_image(stream)
 
     @staticmethod
     def get_nested_dict(item, key_list):
         """Get value from nested dictionary using a key list. """
-        return reduce(lambda x, y:x[y], key_list, item)
+        return reduce(lambda x, y: x[y], key_list, item)
 
     @property
     def bands(self):
@@ -116,3 +111,8 @@ class PlanteraryImage(object):
         stream.seek(self.start_byte)
         if self.format in self.BAND_STORAGE_TYPE:
             return getattr(self, self.BAND_STORAGE_TYPE[self.format])(stream)
+
+    def _band_sequential(self, stream):
+        """Band sequential storage type reader. """
+        data = numpy.fromfile(stream, self.dtype, self.size)
+        return data.reshape(self.shape)
