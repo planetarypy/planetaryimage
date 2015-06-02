@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from image import PlanetaryImage
 from pvl._collections import Units
+from .image import PlanetaryImage
 import numpy
 import six
 
