@@ -6,7 +6,8 @@ from numpy.testing import assert_almost_equal
 from cubefile import CubeFile
 
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
+#DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'tests/data/')
 
 
 def test_cubefile():

@@ -10,7 +10,7 @@ except ImportError:
     pass
 
 
-class PlanteraryImage(object):
+class PlanetaryImage(object):
     """A generic image reader. """
 
     BAND_STORAGE_TYPE = {
@@ -47,12 +47,108 @@ class PlanteraryImage(object):
         self.label = self._parse_label(stream)
 
         #: A numpy array representing the image
-        self.image = self._parse_image(stream)
+        self.data = self._parse_data(stream)
 
     @staticmethod
     def get_nested_dict(item, key_list):
         """Get value from nested dictionary using a key list. """
         return reduce(lambda x, y: x[y], key_list, item)
+
+    def apply_scaling(self, copy=True):
+        """Scale pixel values to there true DN.
+
+        :param copy: whether to apply the scalling to a copy of the pixel data
+            and leave the orginial unaffected
+
+        :returns: a scalled version of the pixel data
+        """
+        if copy:
+            return self.multiplier * self.data + self.base
+
+        if self.multiplier != 1:
+            self.data *= self.multiplier
+
+        if self.base != 0:
+            self.data += self.base
+
+        return self.data
+
+    def apply_numpy_specials(self, copy=True):
+        """Convert isis special pixel values to numpy special pixel values.
+
+            =======  =======
+             Isis     Numpy
+            =======  =======
+            Null     nan
+            Lrs      -inf
+            Lis      -inf
+            His      inf
+            Hrs      inf
+            =======  =======
+
+        :param copy: whether to apply the new special values to a copy of the
+            pixel data and leave the orginial unaffected
+
+        :returns: a numpy array with special values converted to numpy's nan,
+            inf and -inf
+        """
+        if copy:
+            data = self.data.astype(numpy.float64)
+
+        elif self.data.dtype != numpy.float64:
+            data = self.data = self.data.astype(numpy.float64)
+
+        else:
+            data = self.data
+
+        data[data == self.specials['Null']] = numpy.nan
+        data[data < self.specials['Min']] = numpy.NINF
+        data[data > self.specials['Max']] = numpy.inf
+
+        return data
+
+    def specials_mask(self):
+        """Create a pixel map for special pixels.
+
+        :returns: an array where the value is `False` if the pixel is special
+            and `True` otherwise
+        """
+        mask = self.data >= self.specials['Min']
+        mask &= self.data <= self.specials['Max']
+        return mask
+
+    def get_image_array(self):
+        """Create an array for use in making an image.
+
+        Creates a linear stretch of the image and scales it to between `0` and
+        `255`. `Null`, `Lis` and `Lrs` pixels are set to `0`. `His` and `Hrs`
+        pixels are set to `255`.
+
+        Usage::
+
+            from pysis import CubeFile
+            from PIL import Image
+
+            # Read in the image and create the image data
+            image = CubeFile.open('test.cub')
+            data = image.get_image_array()
+
+            # Save the first band to a new file
+            Image.fromarray(data[0]).save('test.png')
+
+        :returns:
+            A uint8 array of pixel values.
+        """
+        specials_mask = self.specials_mask()
+        data = self.data.copy()
+
+        data[specials_mask] -= data[specials_mask].min()
+        data[specials_mask] *= 255 / data[specials_mask].max()
+
+        data[data == self.specials['His']] = 255
+        data[data == self.specials['Hrs']] = 255
+
+        return data.astype(numpy.uint8)
 
     @property
     def bands(self):
@@ -104,15 +200,66 @@ class PlanteraryImage(object):
     def size(self):
         return self.bands * self.lines * self.samples
 
+    @property
+    def base(self):
+        """An additive factor by which to offset pixel DN."""
+        return self.get_nested_dict(self.label, self.LABEL_MAPPING['base'])
+
+    @property
+    def multiplier(self):
+        """A multiplicative factor by which to scale pixel DN."""
+        return self.get_nested_dict(self.label, self.LABEL_MAPPING['multiplier'])
+
     def _parse_label(self, stream):
         return load_label(stream)
 
-    def _parse_image(self, stream):
-        stream.seek(self.start_byte)
-        if self.format in self.BAND_STORAGE_TYPE:
-            return getattr(self, self.BAND_STORAGE_TYPE[self.format])(stream)
+    #def _parse_data(self, stream):
+    #    stream.seek(self.start_byte)
+    #    if self.format in self.BAND_STORAGE_TYPE:
+    #        return getattr(self, self.BAND_STORAGE_TYPE[self.format])(stream)
 
-    def _band_sequential(self, stream):
-        """Band sequential storage type reader. """
+    #def _band_sequential(self, stream):
+    #    """Band sequential storage type reader. """
+    #    data = numpy.fromfile(stream, self.dtype, self.size)
+    #    return data.reshape(self.shape)
+
+    def _parse_data(self, stream):
+        stream.seek(self.start_byte)
+
+        if self.format == 'BandSequential':
+            return self._parse_band_sequential_data(stream)
+
+        if self.format == 'Tile':
+            return self._parse_tile_data(stream)
+
+        raise Exception('Unkown format (%s)' % self.format)
+
+    def _parse_band_sequential_data(self, stream):
         data = numpy.fromfile(stream, self.dtype, self.size)
         return data.reshape(self.shape)
+
+    def _parse_tile_data(self, stream):
+        tile_lines = self.tile_lines
+        tile_samples = self.tile_samples
+        tile_size = tile_lines * tile_samples
+
+        lines = range(0, self.lines, self.tile_lines)
+        samples = range(0, self.samples, self.tile_samples)
+
+        dtype = self.dtype
+        data = numpy.empty(self.shape, dtype=dtype)
+
+        for band in data:
+            for line in lines:
+                for sample in samples:
+                    sample_end = sample + tile_samples
+                    line_end = line + tile_lines
+                    chunk = band[line:line_end, sample:sample_end]
+
+                    tile = numpy.fromfile(stream, dtype, tile_size)
+                    tile = tile.reshape((tile_lines, tile_samples))
+
+                    chunk_lines, chunk_samples = chunk.shape
+                    chunk[:] = tile[:chunk_lines, :chunk_samples]
+
+        return data
