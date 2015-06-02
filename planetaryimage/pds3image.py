@@ -28,7 +28,7 @@ class PDS3Image(PlanetaryImage):
     }
 
     BAND_STORAGE_TYPE = {
-        'BAND_SEQUENTIAL': '_band_sequential'
+        'BAND_SEQUENTIAL': '_parse_band_sequential_data'
     }
 
     def __init__(self, *args, **kwargs):

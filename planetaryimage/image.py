@@ -14,7 +14,7 @@ class PlanetaryImage(object):
     """A generic image reader. """
 
     BAND_STORAGE_TYPE = {
-        'BAND_SEQUENTIAL': '_band_sequential'
+        'BAND_SEQUENTIAL': '_parse_band_sequential_data'
     }
 
     @classmethod
