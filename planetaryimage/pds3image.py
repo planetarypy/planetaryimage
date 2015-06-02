@@ -57,7 +57,7 @@ class PDS3Image(PlanetaryImage):
         """
         pointer = self.label['^IMAGE']
         if isinstance(pointer, six.integer_types):
-            return pointer - 1
+            return (pointer - 1) * self.label['RECORD_BYTES']
         elif isinstance(pointer, Units):
             if pointer.units == 'BYTES':
                 return pointer.value
