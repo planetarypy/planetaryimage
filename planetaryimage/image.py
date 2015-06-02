@@ -225,4 +225,7 @@ class PlanetaryImage(object):
 
     def _parse_band_sequential_data(self, stream):
         data = numpy.fromfile(stream, self.dtype, self.size)
-        return data.reshape(self.shape)
+        data = data.reshape(self.shape)
+        if self.bands == 1:
+            return data.squeeze()
+        return numpy.dstack((data))
