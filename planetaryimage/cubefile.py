@@ -3,8 +3,8 @@ import numpy
 
 from six.moves import range
 
-from image import PlanetaryImage
-from specialpixels import SPECIAL_PIXELS
+from .image import PlanetaryImage
+from .specialpixels import SPECIAL_PIXELS
 
 
 class CubeFile(PlanetaryImage):
