@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+from pvl._collections import Units
 from .image import PlanetaryImage
 import numpy
+import six
 
 
 class PDS3Image(PlanetaryImage):
+
     """ A PDS3 image reader. """
 
     PIXEL_TYPES = {
@@ -25,11 +28,18 @@ class PDS3Image(PlanetaryImage):
     }
 
     BAND_STORAGE_TYPE = {
-        'BAND_SEQUENTIAL': '_band_sequential'
+        'BAND_SEQUENTIAL': '_parse_band_sequential_data'
     }
 
     def __init__(self, *args, **kwargs):
         super(PDS3Image, self).__init__(*args, **kwargs)
+
+    @property
+    def format(self):
+        try:
+            return self.get_nested_dict(self.label, self.LABEL_MAPPING['format'])
+        except KeyError:
+            return 'BAND_SEQUENTIAL'
 
     @property
     def byte_order(self):
@@ -41,7 +51,22 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def start_byte(self):
-        return self.label['^IMAGE'] - 1
+        """Pointer types that are currently implemented are
+            ^IMAGE = nnn
+            ^IMAGE = nnn <BYTES>
+        """
+        pointer = self.label['^IMAGE']
+        if isinstance(pointer, six.integer_types):
+            return (pointer - 1) * self.label['RECORD_BYTES']
+        elif isinstance(pointer, Units):
+            if pointer.units == 'BYTES':
+                return pointer.value
+            else:
+                raise ValueError(
+                    'Expected <BYTES> as image pointer units but found (%s)'
+                    % pointer.units)
+        else:
+            raise ValueError('Unsupported image pointer type')
 
     @property
     def pixel_type(self):

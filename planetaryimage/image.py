@@ -14,7 +14,7 @@ class PlanetaryImage(object):
     """A generic image reader. """
 
     BAND_STORAGE_TYPE = {
-        'BAND_SEQUENTIAL': '_band_sequential'
+        'BAND_SEQUENTIAL': '_parse_band_sequential_data'
     }
 
     @classmethod
@@ -153,7 +153,10 @@ class PlanetaryImage(object):
     @property
     def bands(self):
         """Number of image bands."""
-        return self.get_nested_dict(self.label, self.LABEL_MAPPING['bands'])
+        try:
+            return self.get_nested_dict(self.label, self.LABEL_MAPPING['bands'])
+        except KeyError:
+            return 1
 
     @property
     def lines(self):
