@@ -103,4 +103,6 @@ class CubeFile(PlanetaryImage):
                     chunk_lines, chunk_samples = chunk.shape
                     chunk[:] = tile[:chunk_lines, :chunk_samples]
 
-        return data
+        if self.bands == 1:
+            return data.squeeze()
+        return numpy.dstack((data))
