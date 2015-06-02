@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy
 
-from six import string_types
 from six.moves import range
 
 from image import PlanetaryImage
@@ -35,6 +34,11 @@ class CubeFile(PlanetaryImage):
         'NoByteOrder': '=',  # system
         'Lsb': '<',          # little-endian
         'Msb': '>'           # big-endian
+    }
+
+    BAND_STORAGE_TYPE = {
+        'BAND_SEQUENTIAL': '_band_sequential',
+        'Tile': '_parse_tile_data'
     }
 
     SPECIAL_PIXELS = SPECIAL_PIXELS
@@ -74,3 +78,29 @@ class CubeFile(PlanetaryImage):
     def start_byte(self):
         """Index of the start of the image data (zero indexed)."""
         return self.label['IsisCube']['Core']['StartByte'] - 1
+
+    def _parse_tile_data(self, stream):
+        tile_lines = self.tile_lines
+        tile_samples = self.tile_samples
+        tile_size = tile_lines * tile_samples
+
+        lines = range(0, self.lines, self.tile_lines)
+        samples = range(0, self.samples, self.tile_samples)
+
+        dtype = self.dtype
+        data = numpy.empty(self.shape, dtype=dtype)
+
+        for band in data:
+            for line in lines:
+                for sample in samples:
+                    sample_end = sample + tile_samples
+                    line_end = line + tile_lines
+                    chunk = band[line:line_end, sample:sample_end]
+
+                    tile = numpy.fromfile(stream, dtype, tile_size)
+                    tile = tile.reshape((tile_lines, tile_samples))
+
+                    chunk_lines, chunk_samples = chunk.shape
+                    chunk[:] = tile[:chunk_lines, :chunk_samples]
+
+        return data

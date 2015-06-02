@@ -213,53 +213,13 @@ class PlanetaryImage(object):
     def _parse_label(self, stream):
         return load_label(stream)
 
-    #def _parse_data(self, stream):
-    #    stream.seek(self.start_byte)
-    #    if self.format in self.BAND_STORAGE_TYPE:
-    #        return getattr(self, self.BAND_STORAGE_TYPE[self.format])(stream)
-
-    #def _band_sequential(self, stream):
-    #    """Band sequential storage type reader. """
-    #    data = numpy.fromfile(stream, self.dtype, self.size)
-    #    return data.reshape(self.shape)
-
     def _parse_data(self, stream):
         stream.seek(self.start_byte)
-
-        if self.format == 'BandSequential':
-            return self._parse_band_sequential_data(stream)
-
-        if self.format == 'Tile':
-            return self._parse_tile_data(stream)
+        if self.format in self.BAND_STORAGE_TYPE:
+            return getattr(self, self.BAND_STORAGE_TYPE[self.format])(stream)
 
         raise Exception('Unkown format (%s)' % self.format)
 
     def _parse_band_sequential_data(self, stream):
         data = numpy.fromfile(stream, self.dtype, self.size)
         return data.reshape(self.shape)
-
-    def _parse_tile_data(self, stream):
-        tile_lines = self.tile_lines
-        tile_samples = self.tile_samples
-        tile_size = tile_lines * tile_samples
-
-        lines = range(0, self.lines, self.tile_lines)
-        samples = range(0, self.samples, self.tile_samples)
-
-        dtype = self.dtype
-        data = numpy.empty(self.shape, dtype=dtype)
-
-        for band in data:
-            for line in lines:
-                for sample in samples:
-                    sample_end = sample + tile_samples
-                    line_end = line + tile_lines
-                    chunk = band[line:line_end, sample:sample_end]
-
-                    tile = numpy.fromfile(stream, dtype, tile_size)
-                    tile = tile.reshape((tile_lines, tile_samples))
-
-                    chunk_lines, chunk_samples = chunk.shape
-                    chunk[:] = tile[:chunk_lines, :chunk_samples]
-
-        return data
