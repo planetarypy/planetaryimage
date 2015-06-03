@@ -27,11 +27,11 @@ def test_cubefile():
     assert image.shape == (1, 90, 90)
     assert image.size == 8100
 
-    assert image.data.shape == (1, 90, 90)
+    assert image.data.shape == (90, 90)
     assert image.data.size == 8100
 
     expected = numpy.loadtxt(os.path.join(DATA_DIR, 'pattern.txt'), skiprows=2)
-    assert_almost_equal(image.data[0], expected)
+    assert_almost_equal(image.data, expected)
 
 
 def test_stream_error():

@@ -25,9 +25,9 @@ def test_pds3_1band_file():
     assert image.byte_order == '>'
     assert image.size == 100
 
-    assert image.data.shape == (1, 10, 10)
+    assert image.data.shape == (10, 10)
     assert image.data.size == 100
 
     expected = numpy.loadtxt(
-        os.path.join(DATA_DIR, 'pds3_1band.txt')).reshape(1, 10, 10)
+        os.path.join(DATA_DIR, 'pds3_1band.txt')).reshape(10, 10)
     assert_almost_equal(image.data, expected)
