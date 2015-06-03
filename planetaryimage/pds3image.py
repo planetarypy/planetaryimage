@@ -32,6 +32,8 @@ class PDS3Image(PlanetaryImage):
     }
 
     def __init__(self, *args, **kwargs):
+        if 'memory_layout' not in kwargs:
+            kwargs['memory_layout'] = 'IMAGE'
         super(PDS3Image, self).__init__(*args, **kwargs)
 
     @property

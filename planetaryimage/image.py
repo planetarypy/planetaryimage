@@ -26,12 +26,15 @@ class PlanetaryImage(object):
         with open(filename, 'rb') as fp:
             return cls(fp, filename)
 
-    def __init__(self, stream, filename=None):
+    def __init__(self, stream, filename=None, memory_layout='DISK'):
         """Create an Image file.
 
         :param stream: file object to read as an image file
 
         :param filename: an optional filename to attach to the object
+
+        :param memory_layout: format of the data that is returned
+            supported values are "IMAGE" and "DISK"
         """
         if isinstance(stream, string_types):
             error_msg = (
@@ -42,6 +45,12 @@ class PlanetaryImage(object):
 
         #: The filename if given, otherwise none.
         self.filename = filename
+
+        if memory_layout not in ['IMAGE', 'DISK']:
+            raise ValueError('Unsupported memory_layout value.\
+                Expected "IMAGE" or "DISK"')
+
+        self.memory_layout = memory_layout
 
         #: The parsed label header in dictionary form.
         self.label = self._parse_label(stream)
@@ -225,4 +234,11 @@ class PlanetaryImage(object):
 
     def _parse_band_sequential_data(self, stream):
         data = numpy.fromfile(stream, self.dtype, self.size)
-        return data.reshape(self.shape)
+        data = data.reshape(self.shape)
+        if self.memory_layout == 'IMAGE':
+            if self.bands == 1:
+                return data.squeeze()
+            else:
+                return numpy.dstack((data))
+        else:
+            return data
