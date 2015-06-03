@@ -43,6 +43,11 @@ class CubeFile(PlanetaryImage):
 
     SPECIAL_PIXELS = SPECIAL_PIXELS
 
+    def __init__(self, *args, **kwargs):
+        if 'memory_layout' not in kwargs:
+            kwargs['memory_layout'] = 'DISK'
+        super(CubeFile, self).__init__(*args, **kwargs)
+
     @property
     def tile_lines(self):
         """Number of lines per tile."""
@@ -103,6 +108,10 @@ class CubeFile(PlanetaryImage):
                     chunk_lines, chunk_samples = chunk.shape
                     chunk[:] = tile[:chunk_lines, :chunk_samples]
 
-        if self.bands == 1:
-            return data.squeeze()
-        return numpy.dstack((data))
+        if self.memory_layout == 'IMAGE':
+            if self.bands == 1:
+                return data.squeeze()
+            else:
+                return numpy.dstack((data))
+        else:
+            return data
