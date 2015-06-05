@@ -84,6 +84,11 @@ class CubeFile(PlanetaryImage):
         """Index of the start of the image data (zero indexed)."""
         return self.label['IsisCube']['Core']['StartByte'] - 1
 
+    @property
+    def data_filename(self):
+        """Return detached filename else None. """
+        return self.label['IsisCube']['Core'].get('^Core')
+
     def _parse_tile_data(self, stream):
         tile_lines = self.tile_lines
         tile_samples = self.tile_samples

@@ -67,6 +67,8 @@ class PDS3Image(PlanetaryImage):
                 raise ValueError(
                     'Expected <BYTES> as image pointer units but found (%s)'
                     % pointer.units)
+#        elif isinstance(pointer, list):
+
         else:
             raise ValueError('Unsupported image pointer type')
 
