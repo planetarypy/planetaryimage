@@ -6,6 +6,7 @@ import six
 
 
 class PDS3Image(PlanetaryImage):
+
     """ A PDS3 image reader. """
 
     PIXEL_TYPES = {
@@ -88,7 +89,8 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def byte_order(self):
-        sample_type = self.get_nested_dict(self.label, self.LABEL_MAPPING['sample_type'])
+        sample_type = self.get_nested_dict(
+            self.label, self.LABEL_MAPPING['sample_type'])
         if "LSB" in sample_type:
             return '<'
         else:
@@ -96,32 +98,16 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def start_byte(self):
-        """Pointer types that are currently implemented are
-            ^IMAGE = nnn
-            ^IMAGE = nnn <BYTES>
-        """
-        pointer = self.label['^IMAGE']
-        if isinstance(pointer, six.integer_types):
-            return (pointer - 1) * self.label['RECORD_BYTES']
-        elif isinstance(pointer, Units):
-            if pointer.units == 'BYTES':
-                return pointer.value
-            else:
-                raise ValueError(
-                    'Expected <BYTES> as image pointer units but found (%s)'
-                    % pointer.units)
-#        elif isinstance(pointer, list):
-
-        else:
-            raise ValueError('Unsupported image pointer type')
+        return self.parse_pointer(self.label['^IMAGE'], self.label['RECORD_BYTES'])[0]
 
     @property
     def data_filename(self):
-        return None
+        return self.parse_pointer(self.label['^IMAGE'], 0)[1]
 
     @property
     def pixel_type(self):
-        sample_type = self.get_nested_dict(self.label, self.LABEL_MAPPING['sample_type'])
+        sample_type = self.get_nested_dict(
+            self.label, self.LABEL_MAPPING['sample_type'])
         bits = self.get_nested_dict(self.label, self.LABEL_MAPPING['bits'])
 
         if 'UNSIGNED' in sample_type:
