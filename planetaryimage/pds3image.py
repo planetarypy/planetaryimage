@@ -6,7 +6,6 @@ import six
 
 
 class PDS3Image(PlanetaryImage):
-
     """ A PDS3 image reader. """
 
     PIXEL_TYPES = {
@@ -35,6 +34,50 @@ class PDS3Image(PlanetaryImage):
         if 'memory_layout' not in kwargs:
             kwargs['memory_layout'] = 'IMAGE'
         super(PDS3Image, self).__init__(*args, **kwargs)
+
+    @staticmethod
+    def parse_pointer(pointer_data, record_bytes):
+        """Parses the pointer label.
+        Supported types are
+            ^PTR = nnn
+            ^PTR = nnn <BYTES>
+            ^PTR = "filename"
+            ^PTR = ("filename")
+            ^PTR = ("filename", nnn)
+            ^PTR = ("filename", nnn <BYTES>)
+
+        :param pointer_data: Pointer data read from file
+
+        :param record_bytes: Record multiplier value
+
+        :returns: an array [start_byte, filename or None]
+        """
+        if isinstance(pointer_data, six.integer_types):
+            return [(pointer_data - 1) * record_bytes, None]
+        elif isinstance(pointer_data, Units):
+            if pointer_data.units == 'BYTES':
+                return [pointer_data.value, None]
+            else:
+                raise ValueError(
+                    'Expected <BYTES> as image pointer units but found (%s)'
+                    % pointer_data.units)
+        elif isinstance(pointer_data, six.string_types):
+            return [0, pointer_data]
+        elif isinstance(pointer_data, list):
+            if len(pointer_data) == 1:
+                return [0, pointer_data]
+            else:
+                if isinstance(pointer_data[1], six.integer_types):
+                    return [(pointer_data[1] - 1) * record_bytes, pointer_data[0]]
+                elif isinstance(pointer_data[1], Units):
+                    if pointer_data[1].units == 'BYTES':
+                        return [pointer_data[1].value, pointer_data[0]]
+                    else:
+                        raise ValueError(
+                            'Expected <BYTES> as image pointer units but found (%s)'
+                            % pointer_data.units)
+        else:
+            raise ValueError('Unsupported pointer type')
 
     @property
     def format(self):
@@ -71,6 +114,10 @@ class PDS3Image(PlanetaryImage):
 
         else:
             raise ValueError('Unsupported image pointer type')
+
+    @property
+    def data_filename(self):
+        return None
 
     @property
     def pixel_type(self):
