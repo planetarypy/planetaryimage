@@ -14,9 +14,11 @@ Contents:
    readme
    installation
    usage
+   supported_planetary_image_types
    contributing
    authors
    history
+
 
 Indices and tables
 ==================
