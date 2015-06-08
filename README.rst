@@ -33,7 +33,7 @@ environment and installing the necessary software as well as a few handy
 extras.  It then downloads a sample Pancam PDS image, opens and displays that
 image in your web browser in an
 `IPython Notebook <http://ipython.org/notebook.html>`_.  The example assumes
-you have `Python`, `virtualenv`, and `pip` installed on your system.  If you
+you have ``Python``, ``virtualenv``, and ``pip`` installed on your system.  If you
 don't, don't know what this means or aren't thrilled by the opportunity to
 learn what this means, this software may be a little too immature for you to
 use at this point.
