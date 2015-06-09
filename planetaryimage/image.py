@@ -1,6 +1,7 @@
 from six import string_types
 from pvl import load as load_label
 import numpy
+import os
 
 try:
     # Python 3 moved reduce to the functools module
@@ -11,6 +12,7 @@ except ImportError:
 
 
 class PlanetaryImage(object):
+
     """A generic image reader. """
 
     BAND_STORAGE_TYPE = {
@@ -38,8 +40,8 @@ class PlanetaryImage(object):
         """
         if isinstance(stream, string_types):
             error_msg = (
-               'A file like object is expected for stream. '
-               'Use %s.open(filename) to open a image file.'
+                'A file like object is expected for stream. '
+                'Use %s.open(filename) to open a image file.'
             )
             raise TypeError(error_msg % type(self).__name__)
 
@@ -189,6 +191,11 @@ class PlanetaryImage(object):
         return '>'
 
     @property
+    def data_filename(self):
+        """Return detached filename else None. """
+        return None
+
+    @property
     def pixel_type(self):
         """Pixel value type as numpy.dtype. """
         raise NotImplementedError
@@ -226,11 +233,23 @@ class PlanetaryImage(object):
         return load_label(stream)
 
     def _parse_data(self, stream):
-        stream.seek(self.start_byte)
-        if self.format in self.BAND_STORAGE_TYPE:
-            return getattr(self, self.BAND_STORAGE_TYPE[self.format])(stream)
+        data_stream = stream
+        try:
+            if self.data_filename is not None:
+                dirpath = os.path.dirname(self.filename)
+                data_file = os.path.abspath(
+                    os.path.join(dirpath, self.data_filename))
 
-        raise Exception('Unkown format (%s)' % self.format)
+                data_stream = open(data_file, 'rb')
+
+            data_stream.seek(self.start_byte)
+            if self.format in self.BAND_STORAGE_TYPE:
+                return getattr(self, self.BAND_STORAGE_TYPE[self.format])(data_stream)
+
+            raise Exception('Unkown format (%s)' % self.format)
+
+        finally:
+            data_stream.close()
 
     def _parse_band_sequential_data(self, stream):
         data = numpy.fromfile(stream, self.dtype, self.size)
