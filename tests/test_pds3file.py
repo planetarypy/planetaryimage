@@ -4,6 +4,7 @@ import os
 import numpy
 from numpy.testing import assert_almost_equal
 from planetaryimage import PDS3Image
+from pvl._collections import Units
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
@@ -47,3 +48,14 @@ def test_pds3_1band_disk_format(pattern_data):
     assert image.data.size == 100
 
     assert_almost_equal(image.data[0], pattern_data)
+
+
+def test_parse_pointer():
+    # Example tests/mission_data/1p432690858esfc847p2111l2m1.img
+    assert PDS3Image.parse_pointer(56, 640) == [35200, None]
+    # Example tests/mission_data/W1782844276_1.LBL
+    assert PDS3Image.parse_pointer(["W1782844276_1.IMG",5], 1024) == [4096, 'W1782844276_1.IMG']
+    # TODO: Awaiting other known valid examples to implement remaining conditions
+    #print PDS3Image.parse_pointer("W1782844276_1.IMG", 1024)
+    #print PDS3Image.parse_pointer(["W1782844276_1.IMG"], 1024)
+    #print PDS3Image.parse_pointer(Units(value=45, units='BYTES'), 2)
