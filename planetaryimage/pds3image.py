@@ -9,14 +9,14 @@ class PDS3Image(PlanetaryImage):
 
     """ A PDS3 image reader. """
 
-    PIXEL_TYPES = {
-        'UnsignedByte': numpy.dtype('uint8'),
-        'SignedByte': numpy.dtype('int8'),
-        'UnsignedWord': numpy.dtype('uint16'),
-        'SignedWord': numpy.dtype('int16'),
-        'UnsignedInteger': numpy.dtype('uint32'),
-        'SignedInteger': numpy.dtype('int32'),
-    }
+    LSB_INTEGER_TYPES = ['LSB_INTEGER', 'PC_INTEGER', 'VAX_INTEGER']
+    LSB_UNSIGNED_INTEGER_TYPES = ['LSB_UNSIGNED_INTEGER', 'PC_UNSIGNED_INTEGER',
+                                  'VAX_UNSIGNED_INTEGER']
+    MSB_INTEGER_TYPES = ['MSB_INTEGER', 'MAC_INTEGER', 'SUN_INTEGER', 'INTEGER']
+    MSB_UNSIGNED_INTEGER_TYPES = ['MSB_UNSIGNED_INTEGER', 'UNSIGNED_INTEGER',
+                                  'MAC_UNSIGNED_INTEGER', 'SUN_UNSIGNED_INTEGER']
+    IEEE_REAL_TYPES = ['IEEE_REAL', 'MAC_REAL', 'SUN_REAL', 'REAL', 'FLOAT']
+    PC_REAL_TYPES = ['PC_REAL']
 
     LABEL_MAPPING = {
         'bands': ['IMAGE', 'BANDS'],
@@ -108,21 +108,26 @@ class PDS3Image(PlanetaryImage):
     def pixel_type(self):
         sample_type = self.get_nested_dict(
             self.label, self.LABEL_MAPPING['sample_type'])
-        bits = self.get_nested_dict(self.label, self.LABEL_MAPPING['bits'])
+        bits = str(self.get_nested_dict(self.label, self.LABEL_MAPPING['bits']))
 
-        if 'UNSIGNED' in sample_type:
-            if bits == 8:
-                return self.PIXEL_TYPES['UnsignedByte']
-            if bits == 16:
-                return self.PIXEL_TYPES['UnsignedWord']
-            if bits == 32:
-                return self.PIXEL_TYPES['UnsignedInteger']
-        else:
-            if bits == 8:
-                return self.PIXEL_TYPES['SignedByte']
-            if bits == 16:
-                return self.PIXEL_TYPES['SignedWord']
-            if bits == 32:
-                return self.PIXEL_TYPES['SignedInteger']
+        if sample_type in self.LSB_INTEGER_TYPES:
+            return numpy.dtype('int' + bits).newbyteorder('<')
+
+        if sample_type in self.LSB_UNSIGNED_INTEGER_TYPES:
+            return numpy.dtype('uint' + bits).newbyteorder('<')
+
+        if sample_type in self.MSB_INTEGER_TYPES:
+            return numpy.dtype('int' + bits).newbyteorder('>')
+
+        if sample_type in self.MSB_UNSIGNED_INTEGER_TYPES:
+            return numpy.dtype('uint' + bits).newbyteorder('>')
+
+        # FIXME: IEEE_REAL and PC_REAL should be different
+        if sample_type in self.IEEE_REAL_TYPES:
+            return numpy.dtype('float' + bits)
+
+        if sample_type in self.PC_REAL_TYPES:
+            return numpy.dtype('float' + bits)
+
 
         raise TypeError

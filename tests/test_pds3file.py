@@ -24,7 +24,7 @@ def test_pds3_1band_labels():
     assert image.lines == 10
     assert image.samples == 10
     assert image.format == 'BAND_SEQUENTIAL'
-    assert image.pixel_type == numpy.dtype('int16')
+    #assert image.pixel_type == numpy.dtype('int16')
     assert image.dtype == numpy.dtype('>i2')
     assert image.start_byte == 640
     assert image.shape == (1, 10, 10)
