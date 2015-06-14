@@ -94,9 +94,8 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def start_byte(self):
-        return self.parse_pointer(
-            self.label['^IMAGE'], self.label['RECORD_BYTES']
-        )[0]
+        record_bytes = self.label.get('RECORD_BYTES', None)
+        return self.parse_pointer(self.label['^IMAGE'], record_bytes)[0]
 
     @property
     def data_filename(self):

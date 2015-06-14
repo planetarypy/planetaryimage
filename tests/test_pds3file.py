@@ -54,8 +54,9 @@ def test_parse_pointer():
     # Example tests/mission_data/1p432690858esfc847p2111l2m1.img
     assert PDS3Image.parse_pointer(56, 640) == [35200, None]
     # Example tests/mission_data/W1782844276_1.LBL
-    assert PDS3Image.parse_pointer(["W1782844276_1.IMG",5], 1024) == [4096, 'W1782844276_1.IMG']
+    assert PDS3Image.parse_pointer(["W1782844276_1.IMG", 5], 1024) == [4096, 'W1782844276_1.IMG']
     # TODO: Awaiting other known valid examples to implement remaining conditions
     #print PDS3Image.parse_pointer("W1782844276_1.IMG", 1024)
     #print PDS3Image.parse_pointer(["W1782844276_1.IMG"], 1024)
-    #print PDS3Image.parse_pointer(Units(value=45, units='BYTES'), 2)
+    # ^IMAGE                         = 101337 <BYTES>
+    assert PDS3Image.parse_pointer(Units(value=101337, units='BYTES'), None) == [101337, None]
