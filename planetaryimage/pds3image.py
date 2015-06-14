@@ -14,7 +14,8 @@ class PDS3Image(PlanetaryImage):
                                   'VAX_UNSIGNED_INTEGER']
     MSB_INTEGER_TYPES = ['MSB_INTEGER', 'MAC_INTEGER', 'SUN_INTEGER', 'INTEGER']
     MSB_UNSIGNED_INTEGER_TYPES = ['MSB_UNSIGNED_INTEGER', 'UNSIGNED_INTEGER',
-                                  'MAC_UNSIGNED_INTEGER', 'SUN_UNSIGNED_INTEGER']
+                                  'MAC_UNSIGNED_INTEGER', 'SUN_UNSIGNED_INTEGER'
+                                  ]
     IEEE_REAL_TYPES = ['IEEE_REAL', 'MAC_REAL', 'SUN_REAL', 'REAL', 'FLOAT']
     PC_REAL_TYPES = ['PC_REAL']
 
@@ -89,45 +90,54 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def byte_order(self):
-        sample_type = self.get_nested_dict(
-            self.label, self.LABEL_MAPPING['sample_type'])
-        if "LSB" in sample_type:
-            return '<'
-        else:
-            return '>'
+        return self.data.dtype.byteorder
 
     @property
     def start_byte(self):
-        return self.parse_pointer(self.label['^IMAGE'], self.label['RECORD_BYTES'])[0]
+        return self.parse_pointer(
+            self.label['^IMAGE'], self.label['RECORD_BYTES']
+        )[0]
 
     @property
     def data_filename(self):
         return self.parse_pointer(self.label['^IMAGE'], 0)[1]
 
     @property
+    def dtype(self):
+        """
+        Pixel data type overrides the implementation in PlanetaryImage
+        because PDS3 SAMPLE_TYPE expresses BOTH byte ordering and type.
+        Unlike ISIS CubeFile labels, which apparently express these as
+        separate label values.
+        """
+        return self.pixel_type
+
+    @property
     def pixel_type(self):
-        sample_type = self.get_nested_dict(
-            self.label, self.LABEL_MAPPING['sample_type'])
-        bits = str(self.get_nested_dict(self.label, self.LABEL_MAPPING['bits']))
+        sample_type = self.label['IMAGE']['SAMPLE_TYPE']
+        bits = self.label['IMAGE']['SAMPLE_BITS']
+        sample_bytes = str(bits/8)  # get bytes to match NumPy dtype expressions
 
         if sample_type in self.LSB_INTEGER_TYPES:
-            return numpy.dtype('int' + bits).newbyteorder('<')
+            return numpy.dtype('<i' + sample_bytes)
 
         if sample_type in self.LSB_UNSIGNED_INTEGER_TYPES:
-            return numpy.dtype('uint' + bits).newbyteorder('<')
+            return numpy.dtype('<u' + sample_bytes)
 
         if sample_type in self.MSB_INTEGER_TYPES:
-            return numpy.dtype('int' + bits).newbyteorder('>')
+            return numpy.dtype('>i' + sample_bytes)
 
         if sample_type in self.MSB_UNSIGNED_INTEGER_TYPES:
-            return numpy.dtype('uint' + bits).newbyteorder('>')
+            return numpy.dtype('>u' + sample_bytes)
 
-        # FIXME: IEEE_REAL and PC_REAL should be different
+        # I am guessing byte order by process of elimination
         if sample_type in self.IEEE_REAL_TYPES:
-            return numpy.dtype('float' + bits)
+            return numpy.dtype('>f' + sample_bytes)
 
+        # The byte order used here worked properly for the HiRISE product
+        # DTEEC_008520_2085_009232_2085_A01.IMG
+        # I'd like a little better understand of this.
         if sample_type in self.PC_REAL_TYPES:
-            return numpy.dtype('float' + bits)
-
+            return numpy.dtype('<f' + sample_bytes)
 
         raise TypeError
