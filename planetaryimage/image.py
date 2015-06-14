@@ -60,6 +60,9 @@ class PlanetaryImage(object):
         #: A numpy array representing the image
         self.data = self._parse_data(stream)
 
+    def __repr__(self):
+        return self.filename
+
     @staticmethod
     def get_nested_dict(item, key_list):
         """Get value from nested dictionary using a key list. """
@@ -185,10 +188,8 @@ class PlanetaryImage(object):
 
     @property
     def byte_order(self):
-        """Byte order in numpy format('>', '<', '=').
-        Defaults to msb.
-        """
-        return '>'
+        """Byte order in numpy format('>', '<', '=')."""
+        raise NotImplementedError
 
     @property
     def data_filename(self):
