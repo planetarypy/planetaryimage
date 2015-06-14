@@ -116,7 +116,7 @@ class PDS3Image(PlanetaryImage):
     def pixel_type(self):
         sample_type = self.label['IMAGE']['SAMPLE_TYPE']
         bits = self.label['IMAGE']['SAMPLE_BITS']
-        sample_bytes = str(bits/8)  # get bytes to match NumPy dtype expressions
+        sample_bytes = str(int(bits / 8))  # get bytes to match NumPy dtype expressions
 
         if sample_type in self.LSB_INTEGER_TYPES:
             return numpy.dtype('<i' + sample_bytes)
