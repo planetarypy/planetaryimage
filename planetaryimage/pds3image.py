@@ -19,15 +19,6 @@ class PDS3Image(PlanetaryImage):
     IEEE_REAL_TYPES = ['IEEE_REAL', 'MAC_REAL', 'SUN_REAL', 'REAL', 'FLOAT']
     PC_REAL_TYPES = ['PC_REAL']
 
-    LABEL_MAPPING = {
-        'bands': ['IMAGE', 'BANDS'],
-        'lines': ['IMAGE', 'LINES'],
-        'samples': ['IMAGE', 'LINE_SAMPLES'],
-        'format': ['IMAGE', 'BAND_STORAGE_TYPE'],
-        'bits': ['IMAGE', 'SAMPLE_BITS'],
-        'sample_type': ['IMAGE', 'SAMPLE_TYPE']
-    }
-
     BAND_STORAGE_TYPE = {
         'BAND_SEQUENTIAL': '_parse_band_sequential_data'
     }
@@ -83,10 +74,8 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def format(self):
-        try:
-            return self.get_nested_dict(self.label, self.LABEL_MAPPING['format'])
-        except KeyError:
-            return 'BAND_SEQUENTIAL'
+        format_val = self.label.get('IMAGE').get('format')
+        return format_val if format_val else 'BAND_SEQUENTIAL'
 
     @property
     def byte_order(self):
@@ -100,6 +89,19 @@ class PDS3Image(PlanetaryImage):
     @property
     def data_filename(self):
         return self.parse_pointer(self.label['^IMAGE'], 0)[1]
+
+    @property
+    def bands(self):
+        bands = self.label.get('IMAGE').get('BANDS')
+        return bands if bands else 1
+
+    @property
+    def lines(self):
+        return self.label['IMAGE']['LINES']
+
+    @property
+    def samples(self):
+        return self.label['IMAGE']['LINE_SAMPLES']
 
     @property
     def dtype(self):

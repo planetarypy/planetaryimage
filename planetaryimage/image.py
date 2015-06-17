@@ -167,24 +167,21 @@ class PlanetaryImage(object):
     @property
     def bands(self):
         """Number of image bands."""
-        try:
-            return self.get_nested_dict(self.label, self.LABEL_MAPPING['bands'])
-        except KeyError:
-            return 1
+        raise NotImplementedError
 
     @property
     def lines(self):
         """Number of lines per band."""
-        return self.get_nested_dict(self.label, self.LABEL_MAPPING['lines'])
+        raise NotImplementedError
 
     @property
     def samples(self):
         """Number of samples per line."""
-        return self.get_nested_dict(self.label, self.LABEL_MAPPING['samples'])
+        raise NotImplementedError
 
     @property
     def format(self):
-        return self.get_nested_dict(self.label, self.LABEL_MAPPING['format'])
+        raise NotImplementedError
 
     @property
     def byte_order(self):
@@ -223,12 +220,12 @@ class PlanetaryImage(object):
     @property
     def base(self):
         """An additive factor by which to offset pixel DN."""
-        return self.get_nested_dict(self.label, self.LABEL_MAPPING['base'])
+        raise NotImplementedError
 
     @property
     def multiplier(self):
         """A multiplicative factor by which to scale pixel DN."""
-        return self.get_nested_dict(self.label, self.LABEL_MAPPING['multiplier'])
+        raise NotImplementedError
 
     def _parse_label(self, stream):
         return load_label(stream)

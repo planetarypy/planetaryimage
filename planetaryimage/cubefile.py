@@ -21,15 +21,6 @@ class CubeFile(PlanetaryImage):
         'Double': numpy.dtype('float64')
     }
 
-    LABEL_MAPPING = {
-        'bands': ['IsisCube', 'Core', 'Dimensions', 'Bands'],
-        'lines': ['IsisCube', 'Core', 'Dimensions', 'Lines'],
-        'samples': ['IsisCube', 'Core', 'Dimensions', 'Samples'],
-        'format': ['IsisCube', 'Core', 'Format'],
-        'base': ['IsisCube', 'Core', 'Pixels', 'Base'],
-        'multiplier': ['IsisCube', 'Core', 'Pixels', 'Multiplier'],
-    }
-
     BYTE_ORDERS = {
         'NoByteOrder': '=',  # system
         'Lsb': '<',          # little-endian
@@ -54,6 +45,30 @@ class CubeFile(PlanetaryImage):
         if self.format != 'Tile':
             return None
         return self.label['IsisCube']['Core']['TileLines']
+
+    @property
+    def bands(self):
+        return self.label['IsisCube']['Core']['Dimensions']['Bands']
+
+    @property
+    def lines(self):
+        return self.label['IsisCube']['Core']['Dimensions']['Lines']
+
+    @property
+    def samples(self):
+        return self.label['IsisCube']['Core']['Dimensions']['Samples']
+
+    @property
+    def format(self):
+        return self.label['IsisCube']['Core']['Format']
+
+    @property
+    def base(self):
+        return self.label['IsisCube']['Core']['Pixels']['Base']
+
+    @property
+    def multiplier(self):
+        return self.label['IsisCube']['Core']['Pixels']['Multiplier']
 
     @property
     def tile_samples(self):
