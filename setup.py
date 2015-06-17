@@ -20,7 +20,7 @@ requirements = [
 
 setup(
     name='planetaryimage',
-    version='0.1.0',
+    version='0.2.0',
     description="Planetary image parser",
     long_description=readme + '\n\n' + history,
     author="PlanetaryPy Developers",
