@@ -49,27 +49,31 @@ General Information
 			* Label: Link_to_file
 * Mission - Launch Year - Destination
 
-This list is in chronological order with the most recent (based on launch
-date) mission first at the top of the list and older missions at the bottom.
+This list is in chronological order, based on launch
+date, with the most recent mission at the top of the list and older missions at 
+the bottom.
 
 **Symbols**
 
 * |good| = image works
 * |bad| = image does not work
 * |None| = image has not been tested
-* |nodisp| = planetaryimage can open the file but plt.imshow does not work
+* |nodisp| = planetaryimage can open the file but ``plt.imshow`` does not work
 
 **Editing**
 
 If editing this document, to mark an image as good with a green square (|good|)
-add \|good|, mark bad with a red square (|bad|) add \|bad|, mark that imshow 
-does not work with a blue square (|nodisp|) add \|nodisp| and unknown/not
-tested with a white sqaure (|none|) add \|none| before "Image" like so::
+add ``|good|``, mark bad with a red square (|bad|) add ``|bad|``, mark that 
+imshow does not work with a blue square (|nodisp|) add ``|nodisp|`` and 
+unknown/not tested with a white sqaure (|none|) add ``|none|`` before "Image" 
+like so::
 
  |good| Image: image.img 
  |bad| Image: image.img
  |none| Image: image.img
  |nodisp| Image: image.img
+
+See :doc:`readme` for documentation on how to open the images.
 
 PDS List
 ---------
