@@ -27,10 +27,10 @@ Supported Planetary Image Types
 	* `Mariner 10`_
 	* `Mariner 9`_
 
-.. |bad| image:: /sample_images/bad.png
-.. |good| image:: /sample_images/good.png
-.. |none| image:: /sample_images/None.png
-.. |nodisp| image:: http://www.lumec.com/images/led/plain_square_blue_thumb.png
+.. |bad| image:: /squares/bad.png
+.. |good| image:: /squares/good.png
+.. |none| image:: /squares/None.png
+.. |nodisp| image:: /squares/nodisp.png
 
 
 
