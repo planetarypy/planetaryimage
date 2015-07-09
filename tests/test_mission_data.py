@@ -2,6 +2,7 @@ import os
 from planetaryimage.pds3image import PDS3Image
 import json
 import pytest
+import pvl
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'mission_data/')
@@ -18,5 +19,6 @@ def test_mission_data():
             image = PDS3Image.open(image_path)
             assert data[file_name]['opens'] == "True"
             assert data[file_name]['label'] == image.label.items()[0][1]
-        except:
+        except (pvl.decoder.ParseError, KeyError, UnicodeDecodeError,
+                ValueError):
             assert data[file_name]['opens'] == "False"
