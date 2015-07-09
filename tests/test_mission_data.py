@@ -24,11 +24,6 @@ def test_mission_data():
             try:
                 assert data[file_name]['opens'] == "False"
             except:
-                print "%s is marked as True and should be false" % (file_name)
+                print file_name, "is marked as True and should be false"
         except AssertionError:
-            print "%s is marked as False and should be True" % (file_name)
-            try:
-                assert data[file_name]['label'] == image.label.items()[0][1]
-            except:
-                print """%s needs its label updated in data.json to be
-                 %s """ % (file_name, image.label.items()[0][1])
+            print file_name, "is marked as False and should be True"
