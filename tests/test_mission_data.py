@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os
 from planetaryimage.pds3image import PDS3Image
 import json
@@ -24,6 +26,6 @@ def test_mission_data():
             try:
                 assert data[file_name]['opens'] == "False"
             except:
-                print file_name, "is marked as True and should be false"
+                print (file_name, "is marked as True and should be false")
         except AssertionError:
-            print file_name, "is marked as False and should be True"
+            print (file_name, "is marked as False and should be True")
