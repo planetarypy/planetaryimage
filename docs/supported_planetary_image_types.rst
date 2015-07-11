@@ -618,8 +618,8 @@ PDS List
 			  <http://pds-imaging.jpl.nasa.gov/data/mer/opportunity/mer1no_0xxx/
 			  data/sol0015/edr/1n129510489eff0312p1930l0m1.img>`_
 		* Volume: mer1no_0xxx - RDR
-			* |good| Image:
-			  `1n129510489eff0312p1930l0m1.img
+			* |bad| Image:
+			  `1n129510489mrl0312p1930l0m1.img
 			  <http://pds-imaging.jpl.nasa.gov/data/mer/opportunity/mer1no_0xxx/
 			  data/sol0015/rdr/1n129510489mrl0312p1930l0m1.img>`_
 		* Volume: mer1om_0xxx - Navcam - RDR Mosaics
@@ -962,24 +962,27 @@ PDS List
 	* `Atmospheric Structure Instrument and Meteorology (ASI-MET)
 	  <http://pds-imaging.jpl.nasa.gov/volumes/mpf.html>`_
 	  	* mpam_0001 - Entry, Descent, and Landing ERDR
-	  		* |bad| Image: :download: `r_sacc_s.tab <http://atmos.nmsu.edu/PDS/data/
+	  		* |bad| Image: `r_sacc_s.tab <http://atmos.nmsu.edu/PDS/data/
 	  		  mpam_0001/edl_erdr/r_sacc_s.tab>`_
-	  		* `r_sacc_s.lbl <http://atmos.nmsu.edu/PDS/data/mpam_0001/edl_erdr/
+	  		* Label: 
+	  		  `r_sacc_s.lbl <http://atmos.nmsu.edu/PDS/data/mpam_0001/edl_erdr/
 	  		  r_sacc_s.lbl>`_
   		* mpam_0001 - Surface EDR
   			* |bad| Image: `se0732s.tab <http://atmos.nmsu.edu/PDS/data/
   			  mpam_0001/surf_edr/scidata/se07xxs/se0732s.tab>`_
-  			* `se0732s.lbl <http://atmos.nmsu.edu/PDS/data/mpam_0001/surf_edr/
+  			* Label: 
+  			  `se0732s.lbl <http://atmos.nmsu.edu/PDS/data/mpam_0001/surf_edr/
   			  scidata/se07xxs/se0732s.lbl>`_
   		* mpam_0001 - Surface RDR
   			* |bad| Image: `sr0893s.tab <http://atmos.nmsu.edu/PDS/data/
   			  mpam_0001/surf_rdr/scidata/sr08xxs/sr0893s.tab>`_
-  			* `sr0893s.lbl <http://atmos.nmsu.edu/PDS/data/mpam_0001/surf_rdr/
+  			* Label: 
+  			  `sr0893s.lbl <http://atmos.nmsu.edu/PDS/data/mpam_0001/surf_rdr/
   			  scidata/sr08xxs/sr0893s.lbl>`_
 	* `Imager for Mars Pathfinder EDRs 
 	  <http://pds-imaging.jpl.nasa.gov/volumes/mpf.html>`_
 	  	* mpim_0003 - Rover Cameras
-	  		* |bad| Image: `i277783l.img 
+	  		* |good| Image: `i277783l.img 
 	  		  <http://pds-imaging.jpl.nasa.gov/data/mpfl-m-imp-2-edr-v1.0/
 	  		  mpim_0003/mars/seq0288/c1251xxx/i277783l.img>`_
 	* `Rover Cameras/Alpha X-ray Spectrometer (APXS)
@@ -991,10 +994,10 @@ PDS List
   			* |bad| Image: `ox_perc.tab <http://pdsimage.wr.usgs.gov/archive/
   			  mpfr-m-apxs-2-edr-v1.0/mprv_0001/apxs_ddr/ox_perc.tab>`_
   		* mprv_0001 - Rover Cameras EDR
-  			* |bad| Image: `r9599891.img <http://pdsimage.wr.usgs.gov/archive/
+  			* |good| Image: `r9599891.img <http://pdsimage.wr.usgs.gov/archive/
   			  mpfr-m-apxs-2-edr-v1.0/mprv_0001/rvr_edr/rvr_left/r9599891.img>`_
   		* mprv_0001 - Rover Cameras Mosaicked Image Data Record
-  			* |bad| Image: `r01090al.img <http://pdsimage.wr.usgs.gov/archive/
+  			* |good| Image: `r01090al.img <http://pdsimage.wr.usgs.gov/archive/
   			  mpfr-m-apxs-2-edr-v1.0/mprv_0001/rvr_midr/rvr_mos/r01090al.img>`_
   			* Label: `r01090al.haf <http://pdsimage.wr.usgs.gov/archive/
   			  mpfr-m-apxs-2-edr-v1.0/mprv_0001/rvr_midr/rvr_mos/r01090al.haf?>`_
@@ -1124,7 +1127,7 @@ PDS List
   		* mg_3002 - Global Topography Data Record (GTDR)
 	  		* |bad| Image: `f30.img <http://pds-imaging.jpl.nasa.gov/data/mgn-v
 	  		  -rdrs-5-gdr-emissivity-v1.0/mg_3002/gtdr/merc/f30.img>`_
-	  		* Label: `f30.lbl <hhttp://pds-imaging.jpl.nasa.gov/data/mgn-v-rdrs-
+	  		* Label: `f30.lbl <http://pds-imaging.jpl.nasa.gov/data/mgn-v-rdrs-
 	  		  5-gdr-emissivity-v1.0/mg_3002/gtdr/merc/f30.lbl>`_
 	* `Synthetic-aperture radar (SAR) Experiment Data Records (EDRs)
 	  <http://pds-imaging.jpl.nasa.gov/volumes/magellan.html#mgnSAR>`_
