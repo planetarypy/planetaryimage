@@ -40,6 +40,12 @@ lint:
 test:
 	py.test tests
 
+doctest:
+	# When examples in our docs are reimplemented so that the doctests work
+	# the following test line should be used
+	# py.test --doctest-modules --ignore=setup.py --doctest-glob="docs/*rst"
+	py.test --doctest-modules --ignore=setup.py
+
 test-all:
 	tox
 

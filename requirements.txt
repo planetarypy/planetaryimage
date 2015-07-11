@@ -6,3 +6,5 @@ flake8
 pytest
 tox
 wheel==0.23.0
+sphinx
+numpydoc
