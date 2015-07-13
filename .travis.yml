@@ -11,5 +11,7 @@ python:
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: pip install -r requirements.txt
 
+before_script: get_mission_data
+
 # command to run tests, e.g. python setup.py test
-script: py.test tests
+script: py.test --doctest-modules --ignore=setup.py

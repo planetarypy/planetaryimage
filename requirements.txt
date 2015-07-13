@@ -6,3 +6,6 @@ flake8
 pytest
 tox
 wheel==0.23.0
+sphinx
+numpydoc
+planetary_test_data>=0.3.0

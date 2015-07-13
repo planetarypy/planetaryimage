@@ -7,7 +7,19 @@ import six
 
 class PDS3Image(PlanetaryImage):
 
-    """ A PDS3 image reader. """
+    """A PDS3 image reader.
+
+    Examples
+    --------
+
+    >>> from planetaryimage import PDS3Image
+    >>> image = PDS3Image.open('tests/mission_data/2p129641989eth0361p2600r8m1.img')
+    >>> image
+    tests/mission_data/2p129641989eth0361p2600r8m1.img
+    >>> image.label['IMAGE']['LINES']
+    64
+
+    """
 
     LSB_INTEGER_TYPES = ['LSB_INTEGER', 'PC_INTEGER', 'VAX_INTEGER']
     LSB_UNSIGNED_INTEGER_TYPES = ['LSB_UNSIGNED_INTEGER', 'PC_UNSIGNED_INTEGER',
@@ -31,19 +43,30 @@ class PDS3Image(PlanetaryImage):
     @staticmethod
     def parse_pointer(pointer_data, record_bytes):
         """Parses the pointer label.
-        Supported types are
-            ^PTR = nnn
-            ^PTR = nnn <BYTES>
-            ^PTR = "filename"
-            ^PTR = ("filename")
-            ^PTR = ("filename", nnn)
-            ^PTR = ("filename", nnn <BYTES>)
 
-        :param pointer_data: Pointer data read from file
+        Parameters
+        ----------
+        pointer_data
+            Supported values for `pointer_data` are::
 
-        :param record_bytes: Record multiplier value
+                ^PTR = nnn
+                ^PTR = nnn <BYTES>
+                ^PTR = "filename"
+                ^PTR = ("filename")
+                ^PTR = ("filename", nnn)
+                ^PTR = ("filename", nnn <BYTES>)
 
-        :returns: an array [start_byte, filename or None]
+        record_bytes
+            Record multiplier value
+
+        Returns
+        -------
+        object_location : array
+            Returns an array like::
+
+                [start_byte, filename]
+                [start_byte, None]
+                [0, filename]
         """
         if isinstance(pointer_data, six.integer_types):
             return [(pointer_data - 1) * record_bytes, None]
@@ -97,10 +120,12 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def lines(self):
+        """Number of lines in the image."""
         return self.label['IMAGE']['LINES']
 
     @property
     def samples(self):
+        """Number of samples in a line."""
         return self.label['IMAGE']['LINE_SAMPLES']
 
     @property
@@ -115,9 +140,11 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def pixel_type(self):
+        """The ``numpy.dtype`` of the pixels in the image."""
         sample_type = self.label['IMAGE']['SAMPLE_TYPE']
         bits = self.label['IMAGE']['SAMPLE_BITS']
-        sample_bytes = str(int(bits / 8))  # get bytes to match NumPy dtype expressions
+        # get bytes to match NumPy dtype expressions
+        sample_bytes = str(int(bits / 8))
 
         if sample_type in self.LSB_INTEGER_TYPES:
             return numpy.dtype('<i' + sample_bytes)

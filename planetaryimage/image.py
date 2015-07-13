@@ -13,8 +13,6 @@ except ImportError:
 
 class PlanetaryImage(object):
 
-    """A generic image reader. """
-
     BAND_STORAGE_TYPE = {
         'BAND_SEQUENTIAL': '_parse_band_sequential_data'
     }
@@ -23,20 +21,29 @@ class PlanetaryImage(object):
     def open(cls, filename):
         """ Read an image file from disk
 
-        :param filename: name of file to read as an image file
+        Parameters
+        ----------
+        filename : string
+            name of file to read as an image file
         """
         with open(filename, 'rb') as fp:
             return cls(fp, filename)
 
     def __init__(self, stream, filename=None, memory_layout='DISK'):
-        """Create an Image file.
+        """Create an Image object.
 
-        :param stream: file object to read as an image file
+        Parameters
+        ----------
 
-        :param filename: an optional filename to attach to the object
+        stream
+            file object to read as an image file
 
-        :param memory_layout: format of the data that is returned
-            supported values are "IMAGE" and "DISK"
+        filename : string
+            an optional filename to attach to the object
+
+        memory_layout : string
+            format of the data that is returned supported values are "IMAGE"
+            and "DISK"
         """
         if isinstance(stream, string_types):
             error_msg = (
@@ -71,10 +78,16 @@ class PlanetaryImage(object):
     def apply_scaling(self, copy=True):
         """Scale pixel values to there true DN.
 
-        :param copy: whether to apply the scalling to a copy of the pixel data
+        Parameters
+        ----------
+        copy : boolean
+            whether to apply the scalling to a copy of the pixel data
             and leave the orginial unaffected
 
-        :returns: a scalled version of the pixel data
+        Returns
+        -------
+        scaled_pixel_data
+            a scaled version of the pixel data
         """
         if copy:
             return self.multiplier * self.data + self.base
@@ -100,11 +113,17 @@ class PlanetaryImage(object):
             Hrs      inf
             =======  =======
 
-        :param copy: whether to apply the new special values to a copy of the
+        Parameters
+        ----------
+        copy : boolean
+            whether to apply the new special values to a copy of the
             pixel data and leave the orginial unaffected
 
-        :returns: a numpy array with special values converted to numpy's nan,
-            inf and -inf
+        Returns
+        -------
+        modified_image_data
+            a numpy array with special values converted to numpy's ``nan``,
+            ``inf`` and ``-inf``
         """
         if copy:
             data = self.data.astype(numpy.float64)
@@ -124,7 +143,10 @@ class PlanetaryImage(object):
     def specials_mask(self):
         """Create a pixel map for special pixels.
 
-        :returns: an array where the value is `False` if the pixel is special
+        Returns
+        -------
+        mask_array
+            an array where the value is `False` if the pixel is special
             and `True` otherwise
         """
         mask = self.data >= self.specials['Min']
@@ -150,7 +172,9 @@ class PlanetaryImage(object):
             # Save the first band to a new file
             Image.fromarray(data[0]).save('test.png')
 
-        :returns:
+        Returns
+        -------
+        stretched_array
             A uint8 array of pixel values.
         """
         specials_mask = self.specials_mask()
