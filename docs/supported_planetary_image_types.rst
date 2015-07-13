@@ -73,7 +73,8 @@ like so::
  |none| Image: image.img
  |nodisp| Image: image.img
 
-See :doc:`readme` for documentation on how to open the images.
+See `Usage <https://planetaryimage.readthedocs.org/en/latest/usage.html>`_ for
+documentation on how to open the images.
 
 PDS List
 ---------
@@ -938,7 +939,7 @@ PDS List
 			  <http://pdsimage.wr.usgs.gov/archive/co-e_v_j_s-vims-2-qube-v1.0/c
 			  ovims_0005/data/2004303T191837_2004305T001017/v1477775070_4.lbl>`_
 		* Volume: 35 - BIDR
-			* |bad| Image:
+			* |good| Image:
 			  `BIBQD49N071_D035_T00AS01_V02.ZIP
 			  <http://pds-imaging.jpl.nasa.gov/data/cassini
 			  /cassini_orbiter/CORADR_0035/DATA/BIDR
@@ -948,6 +949,8 @@ PDS List
 			  <http://pds-imaging.jpl.nasa.gov/data/cassini
 			  /cassini_orbiter/CORADR_0035/DATA/BIDR
 			  /BIBQD49N071_D035_T00AS01_V02.LBL>`_
+			* NOTE: This only works *after* opening the zip file to retrieve the
+			  `.IMG` file.
 	* `ISS RDR Cartographic Map Volumes
 	  <http://pds-imaging.jpl.nasa.gov/volumes/carto.html>`_
 	  	* Volume: coiss_3004 - RDR Cartographic Map
