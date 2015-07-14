@@ -14,14 +14,24 @@ def test_mission_data():
         try:
             image = PDS3Image.open(image_path)
             assert data_products.mission_data[file_name]['opens'] == "True"
-            assert data_products.mission_data[file_name]['label'] \
-                == image.label.items()[0][1]
+            data_label = data_products.mission_data[file_name]['label']
+            for key in data_label:
+                try:
+                    if isinstance(data_label[key], dict):
+                        sub_dict = data_label[key]
+                        for sub_key in sub_dict:
+                            assert sub_dict[sub_key] == \
+                                image.label[key][sub_key]
+                    else:
+                        assert data_label[key] == image.label[key]
+                except:
+                    print ("Problem with %s label" % (file_name))
         except (pvl.decoder.ParseError, KeyError, UnicodeDecodeError,
                 ValueError):
             try:
                 assert data_products.mission_data[file_name]['opens'] \
                     == "False"
             except:
-                print (file_name, "is marked as True and should be false")
+                print ("%s is marked as True & should be false" % (file_name))
         except AssertionError:
-            print (file_name, "is marked as False and should be True")
+            print ("%s is marked as False & should be True" % (file_name))
