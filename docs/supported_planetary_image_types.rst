@@ -28,9 +28,17 @@ Supported Planetary Image Types
 	* `Mariner 9`_
 
 .. |bad| image:: /squares/bad.png
+	:width: 16px
+	:height: 16px
 .. |good| image:: /squares/good.png
+	:width: 16px
+	:height: 16px
 .. |none| image:: /squares/None.png
+	:width: 20px
+	:height: 20px
 .. |nodisp| image:: /squares/nodisp.png
+	:width: 15px
+	:height: 15px
 
 
 
