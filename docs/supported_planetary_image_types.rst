@@ -33,12 +33,12 @@ Supported Planetary Image Types
 .. |good| image:: /squares/good.png
 	:width: 16px
 	:height: 16px
-.. |none| image:: /squares/None.png
-	:width: 20px
-	:height: 20px
+.. |none| image:: /squares/none.png
+	:width: 16px
+	:height: 16px
 .. |nodisp| image:: /squares/nodisp.png
-	:width: 15px
-	:height: 15px
+	:width: 16px
+	:height: 16px
 
 
 
@@ -65,7 +65,7 @@ the bottom.
 
 * |good| = image works
 * |bad| = image does not work
-* |None| = image has not been tested
+* |none| = image has not been tested
 * |nodisp| = planetaryimage can open the file but ``plt.imshow`` does not work
 
 **Editing**
