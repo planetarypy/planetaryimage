@@ -28,9 +28,17 @@ Supported Planetary Image Types
 	* `Mariner 9`_
 
 .. |bad| image:: /squares/bad.png
+	:width: 16px
+	:height: 16px
 .. |good| image:: /squares/good.png
-.. |none| image:: /squares/None.png
+	:width: 16px
+	:height: 16px
+.. |none| image:: /squares/none.png
+	:width: 16px
+	:height: 16px
 .. |nodisp| image:: /squares/nodisp.png
+	:width: 16px
+	:height: 16px
 
 General Information
 --------------------
@@ -55,7 +63,7 @@ the bottom.
 
 * |good| = image works
 * |bad| = image does not work
-* |None| = image has not been tested
+* |none| = image has not been tested
 * |nodisp| = planetaryimage can open the file but ``plt.imshow`` does not work
 
 **Editing**
