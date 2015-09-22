@@ -2,6 +2,7 @@ from six import string_types
 from pvl import load as load_label
 import numpy
 import os
+import gzip
 
 try:
     # Python 3 moved reduce to the functools module
@@ -26,8 +27,12 @@ class PlanetaryImage(object):
         filename : string
             name of file to read as an image file
         """
-        with open(filename, 'rb') as fp:
-            return cls(fp, filename)
+        if filename.endswith('.gz'):
+            with gzip.open(filename, 'rb') as fp:
+                return cls(fp, filename)
+        else:
+            with open(filename, 'rb') as fp:
+                return cls(fp, filename)
 
     def __init__(self, stream, filename=None, memory_layout='DISK'):
         """Create an Image object.
@@ -274,7 +279,7 @@ class PlanetaryImage(object):
             data_stream.close()
 
     def _parse_band_sequential_data(self, stream):
-        data = numpy.fromfile(stream, self.dtype, self.size)
+        data = numpy.fromstring(stream.read(self.size*4), self.dtype)
         data = data.reshape(self.shape)
         if self.memory_layout == 'IMAGE':
             if self.bands == 1:
