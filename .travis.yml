@@ -1,19 +1,20 @@
 # Config file for automatic testing at travis-ci.org
-
 language: python
+sudo: false
+
 python:
   - "3.5"
-
-python:
   - "3.4"
   - "3.3"
   - "2.7"
   - "2.6"
 
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+# command to install dependencies
 install: pip install -r requirements.txt
 
-before_script: get_mission_data
+before_script:
+    - flake8 planetaryimage
+    - get_mission_data
 
-# command to run tests, e.g. python setup.py test
+# command to run tests
 script: py.test --doctest-modules --ignore=setup.py
