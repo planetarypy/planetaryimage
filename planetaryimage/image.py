@@ -5,6 +5,7 @@ import os
 import gzip
 import bz2
 
+
 try:
     # Python 3 moved reduce to the functools module
     from functools import reduce
@@ -29,16 +30,24 @@ class PlanetaryImage(object):
             name of file to read as an image file
         """
         if filename.endswith('.gz'):
-            with gzip.open(filename, 'rb') as fp:
-                return cls(fp, filename, compression='gz')
+            try:
+                with gzip.open(filename, 'rb') as fp:
+                    return cls(fp, filename, compression='gz')
+            except AttributeError:
+                raise IOError('GZIP compression not supported until Python 2.6.')
+                return
         elif filename.endswith('.bz2'):
-            with bz2.open(filename, 'rb') as fp:
-                return cls(fp, filename, compression='bz2')
+            try:
+                with bz2.open(filename, 'rb') as fp:
+                    return cls(fp, filename, compression='bz2')
+            except AttributeError:
+                raise IOError('BZ2 compression not supported until Python 2.7.')
+                return
         else:
             with open(filename, 'rb') as fp:
                 return cls(fp, filename)
 
-    def __init__(self, stream, filename=None, compression = 'none', memory_layout='DISK'):
+    def __init__(self, stream, filename=None, compression='none', memory_layout='DISK'):
         """Create an Image object.
 
         Parameters

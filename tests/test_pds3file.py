@@ -7,6 +7,7 @@ import bz2
 from numpy.testing import assert_almost_equal
 from planetaryimage import PDS3Image
 from pvl._collections import Units
+import sys
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
@@ -36,37 +37,46 @@ def test_pds3_1band_labels():
     assert image.size == 100
     assert image.compression == 'none'
 
-def test_gz_pds3_1band_labels():
-    image = PDS3Image.open(gzipped_filename)
 
-    assert image.filename == gzipped_filename
-    assert image.bands == 1
-    assert image.lines == 10
-    assert image.samples == 10
-    assert image.format == 'BAND_SEQUENTIAL'
-    assert image.pixel_type == numpy.dtype('>i2')
-    assert image.dtype == numpy.dtype('>i2')
-    assert image.start_byte == 640
-    assert image.shape == (1, 10, 10)
-    assert image.byte_order == '>'
-    assert image.size == 100
-    assert image.compression == 'gz'
+def test_gz_pds3_1band_labels():
+    if sys.version_info < (2, 7):
+        with pytest.raises(IOError):
+            image = PDS3Image.open(gzipped_filename)
+    else:
+        image = PDS3Image.open(gzipped_filename)
+        assert image.filename == gzipped_filename
+        assert image.bands == 1
+        assert image.lines == 10
+        assert image.samples == 10
+        assert image.format == 'BAND_SEQUENTIAL'
+        assert image.pixel_type == numpy.dtype('>i2')
+        assert image.dtype == numpy.dtype('>i2')
+        assert image.start_byte == 640
+        assert image.shape == (1, 10, 10)
+        assert image.byte_order == '>'
+        assert image.size == 100
+        assert image.compression == 'gz'
+
 
 def test_bz2_pds3_1band_labels():
-    image = PDS3Image.open(bz2_filename)
+    if sys.version_info < (3, 3):
+        with pytest.raises(IOError):
+            image = PDS3Image.open(bz2_filename)
+    else:
+        image = PDS3Image.open(bz2_filename)
+        assert image.filename == bz2_filename
+        assert image.bands == 1
+        assert image.lines == 10
+        assert image.samples == 10
+        assert image.format == 'BAND_SEQUENTIAL'
+        assert image.pixel_type == numpy.dtype('>i2')
+        assert image.dtype == numpy.dtype('>i2')
+        assert image.start_byte == 640
+        assert image.shape == (1, 10, 10)
+        assert image.byte_order == '>'
+        assert image.size == 100
+        assert image.compression == 'bz2'
 
-    assert image.filename == bz2_filename
-    assert image.bands == 1
-    assert image.lines == 10
-    assert image.samples == 10
-    assert image.format == 'BAND_SEQUENTIAL'
-    assert image.pixel_type == numpy.dtype('>i2')
-    assert image.dtype == numpy.dtype('>i2')
-    assert image.start_byte == 640
-    assert image.shape == (1, 10, 10)
-    assert image.byte_order == '>'
-    assert image.size == 100
-    assert image.compression == 'bz2'
 
 def test_pds3_1band_image_format(pattern_data):
     image = PDS3Image.open(filename)
@@ -76,21 +86,28 @@ def test_pds3_1band_image_format(pattern_data):
 
     assert_almost_equal(image.data, pattern_data.reshape(10, 10))
 
+
 def test_gz_pds3_1band_image_format(pattern_data):
-    image = PDS3Image.open(gzipped_filename)
+    if sys.version_info < (2, 7):
+        with pytest.raises(IOError):
+            image = PDS3Image.open(gzipped_filename)
+    else:
+        image = PDS3Image.open(gzipped_filename)
+        assert image.data.shape == (10, 10)
+        assert image.data.size == 100
+        assert_almost_equal(image.data, pattern_data.reshape(10, 10))
 
-    assert image.data.shape == (10, 10)
-    assert image.data.size == 100
-
-    assert_almost_equal(image.data, pattern_data.reshape(10, 10))
 
 def test_bz2_pds3_1band_image_format(pattern_data):
-    image = PDS3Image.open(bz2_filename)
+    if sys.version_info < (3, 3):
+        with pytest.raises(IOError):
+            image = PDS3Image.open(bz2_filename)
+    else:
+        image = PDS3Image.open(bz2_filename)
+        assert image.data.shape == (10, 10)
+        assert image.data.size == 100
+        assert_almost_equal(image.data, pattern_data.reshape(10, 10))
 
-    assert image.data.shape == (10, 10)
-    assert image.data.size == 100
-
-    assert_almost_equal(image.data, pattern_data.reshape(10, 10))
 
 def test_pds3_1band_disk_format(pattern_data):
     image = PDS3Image(open(filename, 'rb'), memory_layout='DISK')
@@ -100,21 +117,28 @@ def test_pds3_1band_disk_format(pattern_data):
 
     assert_almost_equal(image.data[0], pattern_data)
 
+
 def test_gz_pds3_1band_disk_format(pattern_data):
-    image = PDS3Image(gzip.open(gzipped_filename, 'rb'), compression='gz', memory_layout='DISK')
+    if sys.version_info < (2, 7):
+        with pytest.raises(AttributeError):
+            image = PDS3Image(gzip.open(gzipped_filename, 'rb'), compression='gz', memory_layout='DISK')
+    else:
+        image = PDS3Image(gzip.open(gzipped_filename, 'rb'), compression='gz', memory_layout='DISK')
+        assert image.data.shape == (1, 10, 10)
+        assert image.data.size == 100
+        assert_almost_equal(image.data[0], pattern_data)
 
-    assert image.data.shape == (1, 10, 10)
-    assert image.data.size == 100
-
-    assert_almost_equal(image.data[0], pattern_data)
 
 def test_bz2_pds3_1band_disk_format(pattern_data):
-    image = PDS3Image(bz2.open(bz2_filename, 'rb'), compression='bz2', memory_layout='DISK')
+    if sys.version_info < (3, 3):
+        with pytest.raises(AttributeError):
+            image = PDS3Image(bz2.open(bz2_filename, 'rb'), compression='bz2', memory_layout='DISK')
+    else:
+        image = PDS3Image(bz2.open(bz2_filename, 'rb'), compression='bz2', memory_layout='DISK')
+        assert image.data.shape == (1, 10, 10)
+        assert image.data.size == 100
+        assert_almost_equal(image.data[0], pattern_data)
 
-    assert image.data.shape == (1, 10, 10)
-    assert image.data.size == 100
-
-    assert_almost_equal(image.data[0], pattern_data)
 
 def test_parse_pointer():
     # Example tests/mission_data/1p432690858esfc847p2111l2m1.img
