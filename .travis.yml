@@ -1,17 +1,20 @@
 # Config file for automatic testing at travis-ci.org
-
 language: python
 
-python:
-  - "3.4"
-  - "3.3"
-  - "2.7"
-  - "2.6"
+# command to install dependencies
+install: pip install tox
 
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip install -r requirements.txt
-
-before_script: get_mission_data
+# tox environments to run
+env:
+  - TOXENV=py26
+  - TOXENV=py27
+  - TOXENV=py33
+  - TOXENV=py34
+  - TOXENV=py35
+  - TOXENV=flake8
 
 # command to run tests, e.g. python setup.py test
-script: py.test --doctest-modules --ignore=setup.py
+script: tox
+
+# startup faster
+sudo: false
