@@ -119,14 +119,10 @@ def test_pds3_1band_disk_format(pattern_data):
 
 
 def test_gz_pds3_1band_disk_format(pattern_data):
-    if sys.version_info < (2, 7):
-        with pytest.raises(AttributeError):
-            image = PDS3Image(gzip.open(gzipped_filename, 'rb'), compression='gz', memory_layout='DISK')
-    else:
-        image = PDS3Image(gzip.open(gzipped_filename, 'rb'), compression='gz', memory_layout='DISK')
-        assert image.data.shape == (1, 10, 10)
-        assert image.data.size == 100
-        assert_almost_equal(image.data[0], pattern_data)
+    image = PDS3Image(gzip.open(gzipped_filename, 'rb'), compression='gz', memory_layout='DISK')
+    assert image.data.shape == (1, 10, 10)
+    assert image.data.size == 100
+    assert_almost_equal(image.data[0], pattern_data)
 
 
 def test_bz2_pds3_1band_disk_format(pattern_data):
