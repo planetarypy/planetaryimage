@@ -20,7 +20,9 @@ Features
 --------
 
 * Reads in PDS Images as NumPy arrays.
+
   - Supports GZIP and BZ2 compressed PDS Images.
+
 * Reads in Isis Cube Files as NumPy arrays.
 
 Check out a few simple examples of
