@@ -35,7 +35,7 @@ def test_pds3_1band_labels():
     assert image.shape == (1, 10, 10)
     assert image.byte_order == '>'
     assert image.size == 100
-    assert image.compression == 'none'
+    assert image.compression == None
 
 
 def test_gz_pds3_1band_labels():

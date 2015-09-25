@@ -34,20 +34,18 @@ class PlanetaryImage(object):
                 with gzip.open(filename, 'rb') as fp:
                     return cls(fp, filename, compression='gz')
             except AttributeError:
-                raise IOError('GZIP compression not supported until Python 2.6.')
-                return
+                raise IOError('GZIP compression not supported until Python 2.7.')
         elif filename.endswith('.bz2'):
             try:
                 with bz2.open(filename, 'rb') as fp:
                     return cls(fp, filename, compression='bz2')
             except AttributeError:
-                raise IOError('BZ2 compression not supported until Python 2.7.')
-                return
+                raise IOError('BZ2 compression not supported until Python 3.3.')
         else:
             with open(filename, 'rb') as fp:
                 return cls(fp, filename)
 
-    def __init__(self, stream, filename=None, compression='none', memory_layout='DISK'):
+    def __init__(self, stream, filename=None, compression=None, memory_layout='DISK'):
         """Create an Image object.
 
         Parameters

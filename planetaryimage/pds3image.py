@@ -39,7 +39,7 @@ class PDS3Image(PlanetaryImage):
         if 'memory_layout' not in kwargs:
             kwargs['memory_layout'] = 'IMAGE'
         if 'compression' not in kwargs:
-            kwargs['compression'] = 'none'
+            kwargs['compression'] = None
         super(PDS3Image, self).__init__(*args, **kwargs)
 
     @staticmethod
