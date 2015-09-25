@@ -21,9 +21,16 @@ Features
 
 * Reads in PDS Images as NumPy arrays.
 * Reads in Isis Cube Files as NumPy arrays.
+* Supports GZIP and BZ2 compressed files.
 
 Check out a few simple examples of
 `opening and viewing PDS and Isis CubeFiles in an IPython notebook <http://nbviewer.ipython.org/urls/gist.githubusercontent.com/godber/dfb5d012fda603619ab9/raw/b1db599f53a5c468075ff854e9056698bd005cc7/gistfile1.json>`_.
+
+Known Issues
+------------
+
+* GZIP compressed file is not supported until Python 2.7.
+* BZ2 compressed file is not supported until Python 3.3.
 
 Quickstart
 ----------
