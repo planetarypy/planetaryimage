@@ -30,17 +30,17 @@ class PlanetaryImage(object):
             name of file to read as an image file
         """
         if filename.endswith('.gz'):
+            fp = gzip.open(filename, 'rb')
             try:
-                with gzip.open(filename, 'rb') as fp:
-                    return cls(fp, filename, compression='gz')
-            except AttributeError:
-                raise IOError('GZIP compression not supported until Python 2.7.')
+                return cls(fp, filename, compression='gz')
+            finally:
+                fp.close()
         elif filename.endswith('.bz2'):
+            fp = bz2.BZ2File(filename, 'rb')
             try:
-                with bz2.open(filename, 'rb') as fp:
-                    return cls(fp, filename, compression='bz2')
-            except AttributeError:
-                raise IOError('BZ2 compression not supported until Python 3.3.')
+                return cls(fp, filename, compression='bz2')
+            finally:
+                fp.close()
         else:
             with open(filename, 'rb') as fp:
                 return cls(fp, filename)
