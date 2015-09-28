@@ -2,6 +2,9 @@ from six import string_types
 from pvl import load as load_label
 import numpy
 import os
+import gzip
+import bz2
+
 
 try:
     # Python 3 moved reduce to the functools module
@@ -26,10 +29,23 @@ class PlanetaryImage(object):
         filename : string
             name of file to read as an image file
         """
-        with open(filename, 'rb') as fp:
-            return cls(fp, filename)
+        if filename.endswith('.gz'):
+            fp = gzip.open(filename, 'rb')
+            try:
+                return cls(fp, filename, compression='gz')
+            finally:
+                fp.close()
+        elif filename.endswith('.bz2'):
+            fp = bz2.BZ2File(filename, 'rb')
+            try:
+                return cls(fp, filename, compression='bz2')
+            finally:
+                fp.close()
+        else:
+            with open(filename, 'rb') as fp:
+                return cls(fp, filename)
 
-    def __init__(self, stream, filename=None, memory_layout='DISK'):
+    def __init__(self, stream, filename=None, compression=None, memory_layout='DISK'):
         """Create an Image object.
 
         Parameters
@@ -60,6 +76,8 @@ class PlanetaryImage(object):
                 Expected "IMAGE" or "DISK"')
 
         self.memory_layout = memory_layout
+
+        self.compression = compression
 
         #: The parsed label header in dictionary form.
         self.label = self._parse_label(stream)
@@ -274,7 +292,10 @@ class PlanetaryImage(object):
             data_stream.close()
 
     def _parse_band_sequential_data(self, stream):
-        data = numpy.fromfile(stream, self.dtype, self.size)
+        if self.compression == 'none':
+            data = numpy.fromfile(stream, self.dtype, self.size)
+        else:
+            data = numpy.fromstring(stream.read(self.size*4), self.dtype)
         data = data.reshape(self.shape)
         if self.memory_layout == 'IMAGE':
             if self.bands == 1:
