@@ -17,7 +17,7 @@ class BandSequentialDecoder(object):
             data = numpy.fromstring(stream.read(self.size*4), self.dtype)
         else:
             data = numpy.fromfile(stream, self.dtype, self.size)
-        return data
+        return data.reshape(self.shape)
 
 
 class TileDecoder(object):

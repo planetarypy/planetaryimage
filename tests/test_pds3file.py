@@ -36,8 +36,14 @@ def test_pds3_1band_labels(expected):
     #        its OK even though in the PDS labels the information is separate.
     assert image.size == 100
     assert image.compression is None
-    print("Expected: ", expected, expected.dtype, expected.shape)
-    print("Actual: ", image.data, image.data.dtype, image.data.shape)
+
+    # Testing .label
+    assert image.label['FILE_RECORDS'] == 42
+    assert image.label['IMAGE']['SAMPLE_TYPE'] == 'MSB_INTEGER'
+
+    # Testing .data
+    assert image.data.shape == (1, 10, 10)
+    assert image.data.dtype == numpy.dtype('>i2')
     assert_almost_equal(image.data, expected)
 
 
@@ -53,8 +59,14 @@ def test_gz_pds3_1band_labels(expected):
     assert image.shape == (1, 10, 10)
     assert image.size == 100
     assert image.compression == 'gz'
-    print("Expected: ", expected, expected.dtype, expected.shape)
-    print("Actual: ", image.data, image.data.dtype, image.data.shape)
+
+    # Testing .label
+    assert image.label['FILE_RECORDS'] == 42
+    assert image.label['IMAGE']['SAMPLE_TYPE'] == 'MSB_INTEGER'
+
+    # Testing .data
+    assert image.data.shape == (1, 10, 10)
+    assert image.data.dtype == numpy.dtype('>i2')
     assert_almost_equal(image.data, expected)
 
 
@@ -70,8 +82,14 @@ def test_bz2_pds3_1band_labels(expected):
     assert image.shape == (1, 10, 10)
     assert image.size == 100
     assert image.compression == 'bz2'
-    print("Expected: ", expected, expected.dtype, expected.shape)
-    print("Actual: ", image.data, image.data.dtype, image.data.shape)
+
+    # Testing .label
+    assert image.label['FILE_RECORDS'] == 42
+    assert image.label['IMAGE']['SAMPLE_TYPE'] == 'MSB_INTEGER'
+
+    # Testing .data
+    assert image.data.shape == (1, 10, 10)
+    assert image.data.dtype == numpy.dtype('>i2')
     assert_almost_equal(image.data, expected)
 
 
