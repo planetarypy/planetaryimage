@@ -5,20 +5,6 @@ import bz2
 import six
 import pvl
 
-try:
-    # Python 3 moved reduce to the functools module
-    from functools import reduce
-except ImportError:
-    # Python 2 reduce is a built-in
-    pass
-
-
-class PlanetaryImage(object):
-
-    BAND_STORAGE_TYPE = {
-        'BAND_SEQUENTIAL': '_parse_band_sequential_data'
-    }
-
 
 class PlanetaryImage(object):
     """A generic image reader. """

@@ -39,7 +39,7 @@ class Pointer(collections.namedtuple('Pointer', ['filename', 'bytes'])):
             Record multiplier value
 
         Returns
-        ------- 
+        -------
         Pointer object
         """
         if isinstance(value, six.string_types):
