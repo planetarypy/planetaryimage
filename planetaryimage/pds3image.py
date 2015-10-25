@@ -1,49 +1,26 @@
 # -*- coding: utf-8 -*-
-from pvl._collections import Units
-from .image import PlanetaryImage
 import numpy
 import six
+import pvl
+import collections
+
+from .image import PlanetaryImage
+from .decoders import BandSequentialDecoder
 
 
-class PDS3Image(PlanetaryImage):
-
-    """A PDS3 image reader.
-
-    Examples
-    --------
-
-    >>> from planetaryimage import PDS3Image
-    >>> image = PDS3Image.open('tests/mission_data/2p129641989eth0361p2600r8m1.img')
-    >>> image
-    tests/mission_data/2p129641989eth0361p2600r8m1.img
-    >>> image.label['IMAGE']['LINES']
-    64
-
-    """
-
-    LSB_INTEGER_TYPES = ['LSB_INTEGER', 'PC_INTEGER', 'VAX_INTEGER']
-    LSB_UNSIGNED_INTEGER_TYPES = ['LSB_UNSIGNED_INTEGER', 'PC_UNSIGNED_INTEGER',
-                                  'VAX_UNSIGNED_INTEGER']
-    MSB_INTEGER_TYPES = ['MSB_INTEGER', 'MAC_INTEGER', 'SUN_INTEGER', 'INTEGER']
-    MSB_UNSIGNED_INTEGER_TYPES = ['MSB_UNSIGNED_INTEGER', 'UNSIGNED_INTEGER',
-                                  'MAC_UNSIGNED_INTEGER', 'SUN_UNSIGNED_INTEGER'
-                                  ]
-    IEEE_REAL_TYPES = ['IEEE_REAL', 'MAC_REAL', 'SUN_REAL', 'REAL', 'FLOAT']
-    PC_REAL_TYPES = ['PC_REAL']
-
-    BAND_STORAGE_TYPE = {
-        'BAND_SEQUENTIAL': '_parse_band_sequential_data'
-    }
-
-    def __init__(self, *args, **kwargs):
-        if 'memory_layout' not in kwargs:
-            kwargs['memory_layout'] = 'IMAGE'
-        if 'compression' not in kwargs:
-            kwargs['compression'] = None
-        super(PDS3Image, self).__init__(*args, **kwargs)
-
+class Pointer(collections.namedtuple('Pointer', ['filename', 'bytes'])):
     @staticmethod
-    def parse_pointer(pointer_data, record_bytes):
+    def _parse_bytes(value, record_bytes):
+        if isinstance(value, six.integer_types):
+            return (value - 1) * record_bytes
+
+        if isinstance(value, pvl.Units) and value.units == 'BYTES':
+            return value.value
+
+        raise ValueError('Unsupported pointer type')
+
+    @classmethod
+    def parse(cls, value, record_bytes):
         """Parses the pointer label.
 
         Parameters
@@ -62,112 +39,139 @@ class PDS3Image(PlanetaryImage):
             Record multiplier value
 
         Returns
-        -------
-        object_location : array
-            Returns an array like::
-
-                [start_byte, filename]
-                [start_byte, None]
-                [0, filename]
+        ------- 
+        Pointer object
         """
-        if isinstance(pointer_data, six.integer_types):
-            return [(pointer_data - 1) * record_bytes, None]
-        elif isinstance(pointer_data, Units):
-            if pointer_data.units == 'BYTES':
-                return [pointer_data.value, None]
-            else:
-                raise ValueError(
-                    'Expected <BYTES> as image pointer units but found (%s)'
-                    % pointer_data.units)
-        elif isinstance(pointer_data, six.string_types):
-            return [0, pointer_data]
-        elif isinstance(pointer_data, list):
-            if len(pointer_data) == 1:
-                return [0, pointer_data]
-            else:
-                if isinstance(pointer_data[1], six.integer_types):
-                    return [(pointer_data[1] - 1) * record_bytes, pointer_data[0]]
-                elif isinstance(pointer_data[1], Units):
-                    if pointer_data[1].units == 'BYTES':
-                        return [pointer_data[1].value, pointer_data[0]]
-                    else:
-                        raise ValueError(
-                            'Expected <BYTES> as image pointer units but found (%s)'
-                            % pointer_data.units)
-        else:
+        if isinstance(value, six.string_types):
+            return cls(value, 0)
+
+        if isinstance(value, list):
+            if len(value) == 1:
+                return cls(value[0], 0)
+
+            if len(value) == 2:
+                return cls(value[0], cls._parse_bytes(value[1], record_bytes))
+
             raise ValueError('Unsupported pointer type')
 
-    @property
-    def format(self):
-        format_val = self.label.get('IMAGE').get('format')
-        return format_val if format_val else 'BAND_SEQUENTIAL'
+        return cls(None, cls._parse_bytes(value, record_bytes))
+
+
+class PDS3Image(PlanetaryImage):
+    """A PDS3 image reader.
+
+    Examples
+    --------
+
+    >>> from planetaryimage import PDS3Image
+    >>> image = PDS3Image.open('tests/mission_data/2p129641989eth0361p2600r8m1.img')
+    >>> image
+    tests/mission_data/2p129641989eth0361p2600r8m1.img
+    >>> image.label['IMAGE']['LINES']
+    64
+
+    """
+
+    SAMPLE_TYPES = {
+        'MSB_INTEGER': '>i',
+        'INTEGER': '>i',
+        'MAC_INTEGER': '>i',
+        'SUN_INTEGER': '>i',
+
+        'MSB_UNSIGNED_INTEGER': '>u',
+        'UNSIGNED_INTEGER': '>u',
+        'MAC_UNSIGNED_INTEGER': '>u',
+        'SUN_UNSIGNED_INTEGER': '>u',
+
+        'LSB_INTEGER': '<i',
+        'PC_INTEGER': '<i',
+        'VAX_INTEGER': '<i',
+
+        'LSB_UNSIGNED_INTEGER': '<u',
+        'PC_UNSIGNED_INTEGER': '<u',
+        'VAX_UNSIGNED_INTEGER': '<u',
+
+        'IEEE_REAL': '>f',
+        'FLOAT': '>f',
+        'REAL': '>f',
+        'MAC_REAL': '>f',
+        'SUN_REAL': '>f',
+
+        'IEEE_COMPLEX': '>c',
+        'COMPLEX': '>c',
+        'MAC_COMPLEX': '>c',
+        'SUN_COMPLEX': '>c',
+
+        'PC_REAL': '<f',
+        'PC_COMPLEX': '<c',
+
+        'MSB_BIT_STRING': '>S',
+        'LSB_BIT_STRING': '<S',
+        'VAX_BIT_STRING': '<S',
+    }
 
     @property
-    def byte_order(self):
-        return self.data.dtype.byteorder
+    def _bands(self):
+        return self.label['IMAGE'].get('BANDS', 1)
 
     @property
-    def start_byte(self):
-        record_bytes = self.label.get('RECORD_BYTES', None)
-        return self.parse_pointer(self.label['^IMAGE'], record_bytes)[0]
-
-    @property
-    def data_filename(self):
-        return self.parse_pointer(self.label['^IMAGE'], 0)[1]
-
-    @property
-    def bands(self):
-        bands = self.label.get('IMAGE').get('BANDS')
-        return bands if bands else 1
-
-    @property
-    def lines(self):
-        """Number of lines in the image."""
+    def _lines(self):
         return self.label['IMAGE']['LINES']
 
     @property
-    def samples(self):
-        """Number of samples in a line."""
+    def _samples(self):
         return self.label['IMAGE']['LINE_SAMPLES']
 
     @property
-    def dtype(self):
-        """
-        Pixel data type overrides the implementation in PlanetaryImage
-        because PDS3 SAMPLE_TYPE expresses BOTH byte ordering and type.
-        Unlike ISIS CubeFile labels, which apparently express these as
-        separate label values.
-        """
-        return self.pixel_type
+    def _format(self):
+        return self.label['IMAGE'].get('format', 'BAND_SEQUENTIAL')
 
     @property
-    def pixel_type(self):
-        """The ``numpy.dtype`` of the pixels in the image."""
+    def _start_byte(self):
+        return self._image_pointer.bytes
+
+    @property
+    def _data_filename(self):
+        return self._image_pointer.filename
+
+    @property
+    def _dtype(self):
+        return self._pixel_type.newbyteorder(self._byte_order)
+
+    @property
+    def record_bytes(self):
+        """Number of bytes for fixed length records."""
+        return self.label.get('RECORD_BYTES', 0)
+
+    @property
+    def _image_pointer(self):
+        return Pointer.parse(self.label['^IMAGE'], self.record_bytes)
+
+    @property
+    def _sample_type(self):
         sample_type = self.label['IMAGE']['SAMPLE_TYPE']
-        bits = self.label['IMAGE']['SAMPLE_BITS']
+        try:
+            return self.SAMPLE_TYPES[sample_type]
+        except KeyError:
+            raise ValueError('Unsupported sample type: %r' % sample_type)
+
+    @property
+    def _sample_bytes(self):
         # get bytes to match NumPy dtype expressions
-        sample_bytes = str(int(bits / 8))
+        return int(self.label['IMAGE']['SAMPLE_BITS'] / 8)
 
-        if sample_type in self.LSB_INTEGER_TYPES:
-            return numpy.dtype('<i' + sample_bytes)
+    # FIXME:  This dtype overrides the Image.dtype right?  Then whats the point
+    # of _dtype above here ^^, should we just rename this one _dtype and remove
+    # the other one?
+    @property
+    def dtype(self):
+        """Pixel data type."""
+        return numpy.dtype('%s%d' % (self._sample_type, self._sample_bytes))
 
-        if sample_type in self.LSB_UNSIGNED_INTEGER_TYPES:
-            return numpy.dtype('<u' + sample_bytes)
-
-        if sample_type in self.MSB_INTEGER_TYPES:
-            return numpy.dtype('>i' + sample_bytes)
-
-        if sample_type in self.MSB_UNSIGNED_INTEGER_TYPES:
-            return numpy.dtype('>u' + sample_bytes)
-
-        # I am guessing byte order by process of elimination
-        if sample_type in self.IEEE_REAL_TYPES:
-            return numpy.dtype('>f' + sample_bytes)
-
-        # The byte order used here worked properly for the HiRISE product
-        # DTEEC_008520_2085_009232_2085_A01.IMG
-        # I'd like a little better understand of this.
-        if sample_type in self.PC_REAL_TYPES:
-            return numpy.dtype('<f' + sample_bytes)
-
-        raise TypeError
+    @property
+    def _decoder(self):
+        if self.format == 'BAND_SEQUENTIAL':
+            return BandSequentialDecoder(
+                self.dtype, self.shape, self.compression
+            )
+        raise ValueError('Unkown format (%s)' % self.format)
