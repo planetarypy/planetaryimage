@@ -65,8 +65,6 @@ class PDS3Image(PlanetaryImage):
 
     >>> from planetaryimage import PDS3Image
     >>> image = PDS3Image.open('tests/mission_data/2p129641989eth0361p2600r8m1.img')
-    >>> image
-    tests/mission_data/2p129641989eth0361p2600r8m1.img
     >>> image.label['IMAGE']['LINES']
     64
 

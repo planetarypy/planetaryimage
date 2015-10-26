@@ -4,6 +4,7 @@ import gzip
 import bz2
 import six
 import pvl
+import numpy
 
 
 class PlanetaryImage(object):
@@ -16,7 +17,8 @@ class PlanetaryImage(object):
         Parameters
         ----------
         filename : string
-            name of file to read as an image file
+            Name of file to read as an image file.  This file may be gzip
+            (``.gz``) or bzip2 (``.bz2``) compressed.
         """
         if filename.endswith('.gz'):
             fp = gzip.open(filename, 'rb')
@@ -71,6 +73,27 @@ class PlanetaryImage(object):
     def __repr__(self):
         # TODO: pick a better repr
         return self.filename
+
+    @property
+    def image(self):
+        """An Image like array of ``self.data`` convenient for image processing tasks
+
+        * 2D array for single band, grayscale image data
+        * 3D array for three band, RGB image data
+
+        Enables working with ``self.data`` as if it were a PIL image::
+
+         >>> from planetaryimage import PDS3Image
+         >>> import matplotlib.pyplot as plt
+         >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
+         >>> image = PDS3Image.open(testfile)
+         >>> _ = plt.imshow(image.image, cmap='gray')
+        """
+        if self.bands == 1:
+            return self.data.squeeze()
+        elif self.bands == 3:
+            return numpy.dstack(self.data)
+        # TODO: what about multiband images with 2, and 4+ bands?
 
     @property
     def bands(self):

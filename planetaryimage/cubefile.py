@@ -177,7 +177,7 @@ class CubeFile(PlanetaryImage):
 
         Usage::
 
-            from pysis import CubeFile
+            from planetaryimage import CubeFile
             from PIL import Image
 
             # Read in the image and create the image data
