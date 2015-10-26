@@ -34,6 +34,9 @@ setup(
         'pvl',
         'six'
     ],
+    tests_require=[
+        'matplotlib',
+    ],
     license="BSD",
     zip_safe=False,
     keywords='planetaryimage',
