@@ -8,5 +8,10 @@ __all__ = [
     'CubeFile',
 ]
 
-from .pds3image import PDS3Image
+__all__ = [
+    'CubeFile',
+    'PDS3Image',
+]
+
 from .cubefile import CubeFile
+from .pds3image import PDS3Image

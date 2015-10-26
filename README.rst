@@ -70,7 +70,7 @@ the image::
   import matplotlib.pyplot as plt
   from planetaryimage import PDS3Image
   image = PDS3Image.open('1p380322615effbr43p2443l1m1.img')
-  plt.imshow(image.data, cmap='gray')
+  plt.imshow(image.image, cmap='gray')
 
 See `Usage <https://planetaryimage.readthedocs.org/en/latest/usage.html>`_ for
 full documentation on how to use planetaryiamge.

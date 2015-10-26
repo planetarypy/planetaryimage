@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import numpy
 
-from six.moves import range
-
 from .image import PlanetaryImage
 from .specialpixels import SPECIAL_PIXELS
+from .decoders import BandSequentialDecoder, TileDecoder
 
 
 class CubeFile(PlanetaryImage):
@@ -27,17 +26,41 @@ class CubeFile(PlanetaryImage):
         'Msb': '>'           # big-endian
     }
 
-    BAND_STORAGE_TYPE = {
-        'BAND_SEQUENTIAL': '_band_sequential',
-        'Tile': '_parse_tile_data'
-    }
-
     SPECIAL_PIXELS = SPECIAL_PIXELS
 
-    def __init__(self, *args, **kwargs):
-        if 'memory_layout' not in kwargs:
-            kwargs['memory_layout'] = 'DISK'
-        super(CubeFile, self).__init__(*args, **kwargs)
+    @property
+    def _bands(self):
+        return self.label['IsisCube']['Core']['Dimensions']['Bands']
+
+    @property
+    def _lines(self):
+        return self.label['IsisCube']['Core']['Dimensions']['Lines']
+
+    @property
+    def _samples(self):
+        return self.label['IsisCube']['Core']['Dimensions']['Samples']
+
+    @property
+    def _format(self):
+        return self.label['IsisCube']['Core']['Format']
+
+    @property
+    def _start_byte(self):
+        return self.label['IsisCube']['Core']['StartByte'] - 1
+
+    @property
+    def _dtype(self):
+        return self._pixel_type.newbyteorder(self._byte_order)
+
+    @property
+    def base(self):
+        """An additive factor by which to offset pixel DN."""
+        return self.label['IsisCube']['Core']['Pixels']['Base']
+
+    @property
+    def multiplier(self):
+        """A multiplicative factor by which to scale pixel DN."""
+        return self.label['IsisCube']['Core']['Pixels']['Multiplier']
 
     @property
     def tile_lines(self):
@@ -47,30 +70,6 @@ class CubeFile(PlanetaryImage):
         return self.label['IsisCube']['Core']['TileLines']
 
     @property
-    def bands(self):
-        return self.label['IsisCube']['Core']['Dimensions']['Bands']
-
-    @property
-    def lines(self):
-        return self.label['IsisCube']['Core']['Dimensions']['Lines']
-
-    @property
-    def samples(self):
-        return self.label['IsisCube']['Core']['Dimensions']['Samples']
-
-    @property
-    def format(self):
-        return self.label['IsisCube']['Core']['Format']
-
-    @property
-    def base(self):
-        return self.label['IsisCube']['Core']['Pixels']['Base']
-
-    @property
-    def multiplier(self):
-        return self.label['IsisCube']['Core']['Pixels']['Multiplier']
-
-    @property
     def tile_samples(self):
         """Number of samples per tile."""
         if self.format != 'Tile':
@@ -78,60 +77,136 @@ class CubeFile(PlanetaryImage):
         return self.label['IsisCube']['Core']['TileSamples']
 
     @property
-    def byte_order(self):
-        return self.BYTE_ORDERS[self.pixels_group['ByteOrder']]
+    def tile_shape(self):
+        """Shape of tiles."""
+        if self.format != 'Tile':
+            return None
+        return (self.tile_lines, self.tile_samples)
 
     @property
-    def pixels_group(self):
+    def _byte_order(self):
+        return self.BYTE_ORDERS[self._pixels_group['ByteOrder']]
+
+    @property
+    def _pixels_group(self):
         return self.label['IsisCube']['Core']['Pixels']
 
     @property
-    def pixel_type(self):
-        return self.PIXEL_TYPES[self.pixels_group['Type']]
+    def _pixel_type(self):
+        return self.PIXEL_TYPES[self._pixels_group['Type']]
 
     @property
     def specials(self):
-        pixel_type = self.label['IsisCube']['Core']['Pixels']['Type']
+        pixel_type = self._pixels_group['Type']
         return self.SPECIAL_PIXELS[pixel_type]
 
     @property
-    def start_byte(self):
-        """Index of the start of the image data (zero indexed)."""
-        return self.label['IsisCube']['Core']['StartByte'] - 1
-
-    @property
     def data_filename(self):
-        """Return detached filename else None. """
+        """Return detached filename else None."""
         return self.label['IsisCube']['Core'].get('^Core')
 
-    def _parse_tile_data(self, stream):
-        tile_lines = self.tile_lines
-        tile_samples = self.tile_samples
-        tile_size = tile_lines * tile_samples
+    def apply_scaling(self, copy=True):
+        """Scale pixel values to there true DN.
 
-        lines = range(0, self.lines, self.tile_lines)
-        samples = range(0, self.samples, self.tile_samples)
+        :param copy: whether to apply the scalling to a copy of the pixel data
+            and leave the orginial unaffected
 
-        dtype = self.dtype
-        data = numpy.empty(self.shape, dtype=dtype)
+        :returns: a scalled version of the pixel data
+        """
+        if copy:
+            return self.multiplier * self.data + self.base
 
-        for band in data:
-            for line in lines:
-                for sample in samples:
-                    sample_end = sample + tile_samples
-                    line_end = line + tile_lines
-                    chunk = band[line:line_end, sample:sample_end]
+        if self.multiplier != 1:
+            self.data *= self.multiplier
 
-                    tile = numpy.fromfile(stream, dtype, tile_size)
-                    tile = tile.reshape((tile_lines, tile_samples))
+        if self.base != 0:
+            self.data += self.base
 
-                    chunk_lines, chunk_samples = chunk.shape
-                    chunk[:] = tile[:chunk_lines, :chunk_samples]
+        return self.data
 
-        if self.memory_layout == 'IMAGE':
-            if self.bands == 1:
-                return data.squeeze()
-            else:
-                return numpy.dstack((data))
+    def apply_numpy_specials(self, copy=True):
+        """Convert isis special pixel values to numpy special pixel values.
+
+            =======  =======
+             Isis     Numpy
+            =======  =======
+            Null     nan
+            Lrs      -inf
+            Lis      -inf
+            His      inf
+            Hrs      inf
+            =======  =======
+
+        :param copy: whether to apply the new special values to a copy of the
+            pixel data and leave the orginial unaffected
+
+        :returns: a numpy array with special values converted to numpy's nan,
+            inf and -inf
+        """
+        if copy:
+            data = self.data.astype(numpy.float64)
+
+        elif self.data.dtype != numpy.float64:
+            data = self.data = self.data.astype(numpy.float64)
+
         else:
-            return data
+            data = self.data
+
+        data[data == self.specials['Null']] = numpy.nan
+        data[data < self.specials['Min']] = numpy.NINF
+        data[data > self.specials['Max']] = numpy.inf
+
+        return data
+
+    def specials_mask(self):
+        """Create a pixel map for special pixels.
+
+        :returns: an array where the value is `False` if the pixel is special
+            and `True` otherwise
+        """
+        mask = self.data >= self.specials['Min']
+        mask &= self.data <= self.specials['Max']
+        return mask
+
+    def get_image_array(self):
+        """Create an array for use in making an image.
+
+        Creates a linear stretch of the image and scales it to between `0` and
+        `255`. `Null`, `Lis` and `Lrs` pixels are set to `0`. `His` and `Hrs`
+        pixels are set to `255`.
+
+        Usage::
+
+            from planetaryimage import CubeFile
+            from PIL import Image
+
+            # Read in the image and create the image data
+            image = CubeFile.open('test.cub')
+            data = image.get_image_array()
+
+            # Save the first band to a new file
+            Image.fromarray(data[0]).save('test.png')
+
+        :returns:
+            A uint8 array of pixel values.
+        """
+        specials_mask = self.specials_mask()
+        data = self.data.copy()
+
+        data[specials_mask] -= data[specials_mask].min()
+        data[specials_mask] *= 255 / data[specials_mask].max()
+
+        data[data == self.specials['His']] = 255
+        data[data == self.specials['Hrs']] = 255
+
+        return data.astype(numpy.uint8)
+
+    @property
+    def _decoder(self):
+        if self.format == 'BandSequential':
+            return BandSequentialDecoder(self.dtype, self.shape)
+
+        if self.format == 'Tile':
+            return TileDecoder(self.dtype, self.shape, self.tile_shape)
+
+        raise ValueError('Unkown format (%s)' % self.format)

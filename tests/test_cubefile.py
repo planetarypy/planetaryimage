@@ -9,11 +9,6 @@ from planetaryimage import CubeFile
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
 
 
-@pytest.fixture
-def pattern_data():
-    return numpy.loadtxt(os.path.join(DATA_DIR, 'pattern.txt'), skiprows=2)
-
-
 def test_cubefile_labels():
     filename = os.path.join(DATA_DIR, 'pattern.cub')
     image = CubeFile.open(filename)
@@ -32,25 +27,16 @@ def test_cubefile_labels():
     assert image.shape == (1, 90, 90)
     assert image.size == 8100
 
-
-def test_cubefile_disk_format(pattern_data):
     filename = os.path.join(DATA_DIR, 'pattern.cub')
     image = CubeFile.open(filename)
 
     assert image.data.shape == (1, 90, 90)
     assert image.data.size == 8100
 
-    assert_almost_equal(image.data[0], pattern_data)
+    expected_filename = os.path.join(DATA_DIR, 'pattern.txt')
+    expected = numpy.loadtxt(expected_filename, skiprows=2).reshape((1, 90, 90))
 
-
-def test_cubefile_image_format(pattern_data):
-    filename = os.path.join(DATA_DIR, 'pattern.cub')
-    image = CubeFile(open(filename, 'rb'), memory_layout='IMAGE')
-
-    assert image.data.shape == (90, 90)
-    assert image.data.size == 8100
-
-    assert_almost_equal(image.data, pattern_data)
+    assert_almost_equal(image.data, expected)
 
 
 def test_stream_error():
