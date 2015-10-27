@@ -70,6 +70,40 @@ def test_gz_pds3_1band_labels(expected):
     assert_almost_equal(image.data, expected)
 
 
+def test_image_save():
+    image = PDS3Image.open(filename)
+    image.save('Temp_Image.IMG')
+    new_image = PDS3Image.open('Temp_Image.IMG')
+    assert image.bands == new_image.bands
+    assert image.lines == new_image.lines
+    assert image.samples == new_image.samples
+    assert image.format == new_image.format
+    assert image._sample_type == new_image._sample_type
+    assert image.dtype == new_image.dtype
+    assert image._start_byte == new_image._start_byte
+    assert image.shape == new_image.shape
+    assert image.size == new_image.size
+
+
+def test_image_save_overwrite():
+    image = PDS3Image.open(filename)
+    image.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    image_temp.save(overwrite=True)
+    new_image = PDS3Image.open(image_temp.filename)
+    assert image_temp.filename == new_image.filename
+    assert image_temp.bands == new_image.bands
+    assert image_temp.lines == new_image.lines
+    assert image_temp.samples == new_image.samples
+    assert image_temp.format == new_image.format
+    assert image_temp._sample_type == new_image._sample_type
+    assert image_temp.dtype == new_image.dtype
+    assert image_temp._start_byte == new_image._start_byte
+    assert image_temp.shape == new_image.shape
+    assert image_temp.size == new_image.size
+    os.remove('Temp_Image.IMG')
+
+
 def test_bz2_pds3_1band_labels(expected):
     image = PDS3Image.open(bz2_filename)
     assert image.filename == bz2_filename
