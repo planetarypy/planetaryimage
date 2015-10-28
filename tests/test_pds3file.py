@@ -83,6 +83,7 @@ def test_image_save():
     assert image._start_byte == new_image._start_byte
     assert image.shape == new_image.shape
     assert image.size == new_image.size
+    os.remove('Temp_Image.IMG')
 
 
 def test_image_save_overwrite():

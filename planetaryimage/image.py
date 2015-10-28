@@ -75,8 +75,14 @@ class PlanetaryImage(object):
         return self.filename
 
     def save(self, file_to_write=None, overwrite=False):
+
         if overwrite:
             file_to_write = self.filename
+        elif os.path.isfile(file_to_write):
+            msg = 'File ' + file_to_write + ' already exists !\n' + \
+                  'Please make overwrite = True to write the same file.'
+            raise IOError(msg)
+
         serial_label = pvl.dumps(self.label)
         label_sz = len(serial_label)
         image_pointer = int(label_sz / self.label['RECORD_BYTES']) + 1
