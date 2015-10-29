@@ -110,13 +110,21 @@ def test_image_save_overwrite():
     assert image_temp.shape == new_image.shape
     assert image_temp.size == new_image.size
 
+    # Testing .label
     assert image_temp.label['FILE_RECORDS'] == new_image.label['FILE_RECORDS']
     label_sample_type = image_temp.label['IMAGE']['SAMPLE_TYPE']
     assert label_sample_type == new_image.label['IMAGE']['SAMPLE_TYPE']
 
+    # Testing .data
     assert image_temp.data.shape == new_image.data.shape
     assert image_temp.data.dtype == image.data.dtype
     os.remove('Temp_Image.IMG')
+
+
+def test_image_save_samefile():
+    image = PDS3Image.open(filename)
+    with pytest.raises(IOError):
+        image.save(image.filename)
 
 
 def test_bz2_pds3_1band_labels(expected):
