@@ -78,11 +78,19 @@ def test_image_save():
     assert image.lines == new_image.lines
     assert image.samples == new_image.samples
     assert image.format == new_image.format
-    assert image._sample_type == new_image._sample_type
     assert image.dtype == new_image.dtype
-    assert image._start_byte == new_image._start_byte
+    assert image.start_byte == new_image.start_byte
     assert image.shape == new_image.shape
     assert image.size == new_image.size
+
+    # Testing .label
+    assert image.label['FILE_RECORDS'] == new_image.label['FILE_RECORDS']
+    label_sample_type = image.label['IMAGE']['SAMPLE_TYPE']
+    assert label_sample_type == new_image.label['IMAGE']['SAMPLE_TYPE']
+
+    # Testing .data
+    assert image.data.shape == new_image.data.shape
+    assert image.data.dtype == image.data.dtype
     os.remove('Temp_Image.IMG')
 
 
@@ -97,11 +105,17 @@ def test_image_save_overwrite():
     assert image_temp.lines == new_image.lines
     assert image_temp.samples == new_image.samples
     assert image_temp.format == new_image.format
-    assert image_temp._sample_type == new_image._sample_type
     assert image_temp.dtype == new_image.dtype
-    assert image_temp._start_byte == new_image._start_byte
+    assert image_temp.start_byte == new_image.start_byte
     assert image_temp.shape == new_image.shape
     assert image_temp.size == new_image.size
+
+    assert image_temp.label['FILE_RECORDS'] == new_image.label['FILE_RECORDS']
+    label_sample_type = image_temp.label['IMAGE']['SAMPLE_TYPE']
+    assert label_sample_type == new_image.label['IMAGE']['SAMPLE_TYPE']
+
+    assert image_temp.data.shape == new_image.data.shape
+    assert image_temp.data.dtype == image.data.dtype
     os.remove('Temp_Image.IMG')
 
 

@@ -28,6 +28,9 @@ class CubeFile(PlanetaryImage):
 
     SPECIAL_PIXELS = SPECIAL_PIXELS
 
+    def _save(self, file_to_write, overwrite):
+        raise NotImplementedError
+
     @property
     def _bands(self):
         return self.label['IsisCube']['Core']['Dimensions']['Bands']
