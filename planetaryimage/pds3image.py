@@ -114,30 +114,29 @@ class PDS3Image(PlanetaryImage):
             file_to_write = self.filename
         elif os.path.isfile(file_to_write):
             msg = 'File ' + file_to_write + ' already exists !\n' + \
-                  'Please make overwrite = True to write the same file.'
+                  'Call save() with "overwrite = True" to overwrite the file.'
             raise IOError(msg)
 
-        serial_label = pvl.dumps(self.label)
+        encoder = pvl.encoder.PDSLabelEncoder
+        serial_label = pvl.dumps(self.label, cls=encoder)
         label_sz = len(serial_label)
         image_pointer = int(label_sz / self.label['RECORD_BYTES']) + 1
         self.label['^IMAGE'] = image_pointer + 1
 
         diff = 0
-        if len(pvl.dumps(self.label)) != label_sz:
-            diff = label_sz - len(pvl.dumps(self.label))
-        pvl.dump(self.label, file_to_write)
+        if len(pvl.dumps(self.label, cls=encoder)) != label_sz:
+            diff = label_sz - len(pvl.dumps(self.label, cls=encoder))
+        pvl.dump(self.label, file_to_write, cls=encoder)
         offset = image_pointer * self.label['RECORD_BYTES'] - label_sz
         stream = open(file_to_write, 'a')
 
         for i in range(0, offset+diff):
             stream.write(" ")
 
-        if self.bands > 1:
-            for i in range(0, self.bands):
-                data = self.data[i, :, :].byteswap()
-                data.tofile(stream, format='%i')
+        if (self._bands > 1 and self._format != 'BAND_SEQUENTIAL'):
+            raise NotImplementedError
         else:
-            self.data.tofile(stream, format='%i')
+            self.data.tofile(stream, format='%' + self._sample_type[1])
         stream.close()
 
     @property
@@ -154,7 +153,7 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def _format(self):
-        return self.label['IMAGE'].get('format', 'BAND_SEQUENTIAL')
+        return self.label['IMAGE'].get('BAND_STORAGE_TYPE', 'BAND_SEQUENTIAL')
 
     @property
     def _start_byte(self):
