@@ -74,6 +74,9 @@ class PlanetaryImage(object):
         # TODO: pick a better repr
         return self.filename
 
+    def save(self, file_to_write=None, overwrite=False):
+        self._save(file_to_write, overwrite)
+
     @property
     def image(self):
         """An Image like array of ``self.data`` convenient for image processing tasks

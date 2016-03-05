@@ -39,6 +39,13 @@ def test_cubefile_labels():
     assert_almost_equal(image.data, expected)
 
 
+def test_cubefile_save():
+    filename = os.path.join(DATA_DIR, 'pattern.cub')
+    image = CubeFile.open(filename)
+    with pytest.raises(NotImplementedError):
+        image.save('Temp_Image.cub')
+
+
 def test_stream_error():
     with pytest.raises(TypeError):
         CubeFile('filename.cub')
