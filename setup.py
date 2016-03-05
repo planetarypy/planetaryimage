@@ -17,8 +17,8 @@ with open('HISTORY.rst') as history_file:
 
 setup(
     name='planetaryimage',
-    version='0.3.0',
-    description="Planetary image parser",
+    version='0.4.0',
+    description="Planetary image parser supporting",
     long_description=readme + '\n\n' + history,
     author="PlanetaryPy Developers",
     author_email='contact@planetarypy.com',
@@ -48,5 +48,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
     ]
 )
