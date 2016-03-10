@@ -170,6 +170,6 @@ class PDS3Image(PlanetaryImage):
     def _decoder(self):
         if self.format == 'BAND_SEQUENTIAL':
             return BandSequentialDecoder(
-                self.dtype, self.shape, self.compression
+                self.dtype, self.shape, self._sample_bytes, self.compression
             )
         raise ValueError('Unkown format (%s)' % self.format)
