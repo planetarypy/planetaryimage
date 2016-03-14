@@ -14,7 +14,7 @@ class BandSequentialDecoder(object):
 
     def decode(self, stream):
         if self.compression:
-            data = numpy.fromstring(stream.read(self.size * 4), self.dtype)
+            data = numpy.fromstring(stream.read(self.size*4), self.dtype)
         else:
             data = numpy.fromfile(stream, self.dtype, self.size)
         return data.reshape(self.shape)
