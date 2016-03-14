@@ -109,6 +109,19 @@ class PDS3Image(PlanetaryImage):
         'VAX_BIT_STRING': '<S',
     }
 
+    DTYPES = {
+        '>i': 'MSB_INTEGER',
+        '>u': 'MSB_UNSIGNED_INTEGER',
+        '<i': 'LSB_INTEGER',
+        '<u': 'LSB_UNSIGNED_INTEGER',
+        '>f': 'IEEE_REAL',
+        '>c': 'IEEE_COMPLEX',
+        '<f': 'PC_REAL',
+        '<c': 'PC_COMPLEX',
+        '>S': 'MSB_BIT_STRING',
+        '<S': 'LSB_BIT_STRING',
+    }
+
     def _save(self, file_to_write, overwrite):
         if overwrite:
             file_to_write = self.filename
@@ -123,6 +136,15 @@ class PDS3Image(PlanetaryImage):
         image_pointer = int(label_sz / self.label['RECORD_BYTES']) + 1
         self.label['^IMAGE'] = image_pointer + 1
 
+        if self._sample_bytes != self.data.itemsize:
+            self.label['IMAGE']['SAMPLE_BITS'] = self.data.itemsize * 8
+            sample_type_to_save = self.DTYPES[self.dtype.byteorder + self.dtype.char]
+            self.label['IMAGE']['SAMPLE_TYPE'] = sample_type_to_save
+
+        self.label['IMAGE']['BANDS'] = self.shape[0]
+        self.label['IMAGE']['LINES'] = self.shape[1]
+        self.label['IMAGE']['LINE_SAMPLES'] = self.shape[2]
+
         diff = 0
         if len(pvl.dumps(self.label, cls=encoder)) != label_sz:
             diff = label_sz - len(pvl.dumps(self.label, cls=encoder))
@@ -136,7 +158,7 @@ class PDS3Image(PlanetaryImage):
         if (self._bands > 1 and self._format != 'BAND_SEQUENTIAL'):
             raise NotImplementedError
         else:
-            self.data.tofile(stream, format='%' + self._sample_type[1])
+            self.data.tofile(stream, format='%' + self.dtype.char)
         stream.close()
 
     @property
@@ -195,12 +217,15 @@ class PDS3Image(PlanetaryImage):
     @property
     def dtype(self):
         """Pixel data type."""
-        return numpy.dtype('%s%d' % (self._sample_type, self._sample_bytes))
+        try:
+            return self.data.dtype
+        except AttributeError:
+            return numpy.dtype('%s%d' % (self._sample_type, self._sample_bytes))
 
     @property
     def _decoder(self):
         if self.format == 'BAND_SEQUENTIAL':
             return BandSequentialDecoder(
-                self.dtype, self.shape, self.compression
+                self.dtype, self.shape, self._sample_bytes, self.compression
             )
         raise ValueError('Unkown format (%s)' % self.format)

@@ -3,10 +3,11 @@ from six.moves import range
 
 
 class BandSequentialDecoder(object):
-    def __init__(self, dtype, shape, compression=None):
+    def __init__(self, dtype, shape, sample_bytes, compression=None):
         self.dtype = dtype
         self.shape = shape
         self.compression = compression
+        self.sample_bytes = sample_bytes
 
     @property
     def size(self):
@@ -14,7 +15,7 @@ class BandSequentialDecoder(object):
 
     def decode(self, stream):
         if self.compression:
-            data = numpy.fromstring(stream.read(self.size*4), self.dtype)
+            data = numpy.fromstring(stream.read(self.size * self.sample_bytes), self.dtype)
         else:
             data = numpy.fromfile(stream, self.dtype, self.size)
         return data.reshape(self.shape)
