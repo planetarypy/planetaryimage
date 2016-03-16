@@ -9,6 +9,7 @@ from pvl import Units
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
 filename = os.path.join(DATA_DIR, 'pds3_1band.IMG')
+filename_3bands = os.path.join(DATA_DIR, 'pds3_3bands.IMG')
 gzipped_filename = os.path.join(DATA_DIR, 'pds3_1band.IMG.gz')
 bz2_filename = os.path.join(DATA_DIR, 'pds3_1band.IMG.bz2')
 
@@ -125,6 +126,35 @@ def test_image_save_samefile():
     image = PDS3Image.open(filename)
     with pytest.raises(IOError):
         image.save(image.filename)
+
+
+def test_image_save_lines_linesamples():
+    image = PDS3Image.open(filename)
+    image.data = image.data[0, 3:8, 3:8]
+    image.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    assert image_temp.lines == 5
+    assert image_temp.samples == 5
+    os.remove('Temp_Image.IMG')
+
+
+def test_image_save_3bands():
+    image = PDS3Image.open(filename)
+    temp_data = numpy.array([image.data, image.data, image.data])
+    image.data = temp_data.reshape(3, 10, 10)
+    image.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    assert image_temp.bands == 3
+    os.remove('Temp_Image.IMG')
+
+
+def test_image_save_1band():
+    image = PDS3Image.open(filename_3bands)
+    image.data = image.data[0, :, :]
+    image.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    assert image_temp.bands == 1
+    os.remove('Temp_Image.IMG')
 
 
 def test_bz2_pds3_1band_labels(expected):
