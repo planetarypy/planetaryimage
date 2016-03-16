@@ -141,9 +141,14 @@ class PDS3Image(PlanetaryImage):
             sample_type_to_save = self.DTYPES[self.dtype.byteorder + self.dtype.char]
             self.label['IMAGE']['SAMPLE_TYPE'] = sample_type_to_save
 
-        self.label['IMAGE']['BANDS'] = self.shape[0]
-        self.label['IMAGE']['LINES'] = self.shape[1]
-        self.label['IMAGE']['LINE_SAMPLES'] = self.shape[2]
+        if len(self.shape) == 3:
+            self.label['IMAGE']['BANDS'] = self.shape[0]
+            self.label['IMAGE']['LINES'] = self.shape[1]
+            self.label['IMAGE']['LINE_SAMPLES'] = self.shape[2]
+        else:
+            self.label['IMAGE']['BANDS'] = 1
+            self.label['IMAGE']['LINES'] = self.shape[0]
+            self.label['IMAGE']['LINE_SAMPLES'] = self.shape[1]
 
         diff = 0
         if len(pvl.dumps(self.label, cls=encoder)) != label_sz:

@@ -138,15 +138,7 @@ class PlanetaryImage(object):
     @property
     def shape(self):
         """Tuple of images bands, lines and samples."""
-        try:
-            if len(self.data.shape) == 3:
-                return self.data.shape
-            elif len(self.data.shape) == 2:
-                return (1, self.data.shape[0], self.data.shape[1])
-            else:
-                return (1, 1, self.data.shape[0])
-        except AttributeError:
-            return (self.bands, self.lines, self.samples)
+        return (self.bands, self.lines, self.samples)
 
     @property
     def size(self):
