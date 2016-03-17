@@ -10,6 +10,7 @@ from pvl import Units
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
 filename = os.path.join(DATA_DIR, 'pds3_1band.IMG')
 filename_3bands = os.path.join(DATA_DIR, 'pds3_3bands.IMG')
+filename_float = os.path.join(DATA_DIR, 'pds3_1band_float.IMG')
 gzipped_filename = os.path.join(DATA_DIR, 'pds3_1band.IMG.gz')
 bz2_filename = os.path.join(DATA_DIR, 'pds3_1band.IMG.bz2')
 
@@ -154,6 +155,30 @@ def test_image_save_1band():
     image.save('Temp_Image.IMG')
     image_temp = PDS3Image.open('Temp_Image.IMG')
     assert image_temp.bands == 1
+    os.remove('Temp_Image.IMG')
+
+
+def test_image_save_int_to_float():
+    image = PDS3Image.open(filename)
+    ref_image = PDS3Image.open(filename_float)
+    image.data = image.data.astype('>f4')
+    image.data *= 1.5
+    image.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    assert image_temp.dtype == ref_image.dtype
+    assert_almost_equal(image.data, ref_image.data)
+    os.remove('Temp_Image.IMG')
+
+
+def test_image_save_float_to_int():
+    image = PDS3Image.open(filename_float)
+    ref_image = PDS3Image.open(filename)
+    image.data /= 1.5
+    image.data = image.data.astype('>i2')
+    image.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    assert image_temp.dtype == ref_image.dtype
+    assert_almost_equal(image.data, ref_image.data)
     os.remove('Temp_Image.IMG')
 
 

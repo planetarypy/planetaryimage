@@ -138,7 +138,7 @@ class PDS3Image(PlanetaryImage):
 
         if self._sample_bytes != self.data.itemsize:
             self.label['IMAGE']['SAMPLE_BITS'] = self.data.itemsize * 8
-            sample_type_to_save = self.DTYPES[self.dtype.byteorder + self.dtype.char]
+            sample_type_to_save = self.DTYPES[self._sample_type[0] + self.dtype.kind]
             self.label['IMAGE']['SAMPLE_TYPE'] = sample_type_to_save
 
         if len(self.data.shape) == 3:
@@ -152,18 +152,17 @@ class PDS3Image(PlanetaryImage):
 
         diff = 0
         if len(pvl.dumps(self.label, cls=encoder)) != label_sz:
-            diff = label_sz - len(pvl.dumps(self.label, cls=encoder))
+            diff = abs(label_sz - len(pvl.dumps(self.label, cls=encoder)))
         pvl.dump(self.label, file_to_write, cls=encoder)
         offset = image_pointer * self.label['RECORD_BYTES'] - label_sz
         stream = open(file_to_write, 'a')
-
         for i in range(0, offset+diff):
             stream.write(" ")
 
         if (self._bands > 1 and self._format != 'BAND_SEQUENTIAL'):
             raise NotImplementedError
         else:
-            self.data.tofile(stream, format='%' + self.dtype.char)
+            self.data.tofile(stream, format='%' + self.dtype.kind)
         stream.close()
 
     @property
