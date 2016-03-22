@@ -3,10 +3,10 @@ from six.moves import range
 
 
 class BandSequentialDecoder(object):
-    def __init__(self, dtype, shape, sample_bytes, compression=None):
+    def __init__(self, dtype, shape, compression=None):
         self.dtype = dtype
         self.shape = shape
-        self.sample_bytes = sample_bytes
+        self.sample_bytes = dtype.itemsize
         self.compression = compression
 
     @property
