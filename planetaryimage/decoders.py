@@ -6,6 +6,7 @@ class BandSequentialDecoder(object):
     def __init__(self, dtype, shape, compression=None):
         self.dtype = dtype
         self.shape = shape
+        self.sample_bytes = dtype.itemsize
         self.compression = compression
 
     @property
@@ -14,7 +15,7 @@ class BandSequentialDecoder(object):
 
     def decode(self, stream):
         if self.compression:
-            data = numpy.fromstring(stream.read(self.size*4), self.dtype)
+            data = numpy.fromstring(stream.read(self.size*self.sample_bytes), self.dtype)
         else:
             data = numpy.fromfile(stream, self.dtype, self.size)
         return data.reshape(self.shape)
