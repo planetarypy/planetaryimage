@@ -3,6 +3,12 @@
 History
 -------
 
+0.4.1 (2016-03-26)
+---------------------
+
+* Fixes to saving PDS3 images files after modification of the data.
+
+
 0.4.0 (2016-03-05)
 ---------------------
 
