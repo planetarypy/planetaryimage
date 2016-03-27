@@ -109,6 +109,19 @@ class PDS3Image(PlanetaryImage):
         'VAX_BIT_STRING': '<S',
     }
 
+    DTYPES = {
+        '>i': 'MSB_INTEGER',
+        '>u': 'MSB_UNSIGNED_INTEGER',
+        '<i': 'LSB_INTEGER',
+        '<u': 'LSB_UNSIGNED_INTEGER',
+        '>f': 'IEEE_REAL',
+        '>c': 'IEEE_COMPLEX',
+        '<f': 'PC_REAL',
+        '<c': 'PC_COMPLEX',
+        '>S': 'MSB_BIT_STRING',
+        '<S': 'LSB_BIT_STRING',
+    }
+
     def _save(self, file_to_write, overwrite):
         if overwrite:
             file_to_write = self.filename
@@ -123,20 +136,33 @@ class PDS3Image(PlanetaryImage):
         image_pointer = int(label_sz / self.label['RECORD_BYTES']) + 1
         self.label['^IMAGE'] = image_pointer + 1
 
+        if self._sample_bytes != self.data.itemsize:
+            self.label['IMAGE']['SAMPLE_BITS'] = self.data.itemsize * 8
+            sample_type_to_save = self.DTYPES[self._sample_type[0] + self.dtype.kind]
+            self.label['IMAGE']['SAMPLE_TYPE'] = sample_type_to_save
+
+        if len(self.data.shape) == 3:
+            self.label['IMAGE']['BANDS'] = self.data.shape[0]
+            self.label['IMAGE']['LINES'] = self.data.shape[1]
+            self.label['IMAGE']['LINE_SAMPLES'] = self.data.shape[2]
+        else:
+            self.label['IMAGE']['BANDS'] = 1
+            self.label['IMAGE']['LINES'] = self.data.shape[0]
+            self.label['IMAGE']['LINE_SAMPLES'] = self.data.shape[1]
+
         diff = 0
         if len(pvl.dumps(self.label, cls=encoder)) != label_sz:
-            diff = label_sz - len(pvl.dumps(self.label, cls=encoder))
+            diff = abs(label_sz - len(pvl.dumps(self.label, cls=encoder)))
         pvl.dump(self.label, file_to_write, cls=encoder)
         offset = image_pointer * self.label['RECORD_BYTES'] - label_sz
         stream = open(file_to_write, 'a')
-
         for i in range(0, offset+diff):
             stream.write(" ")
 
         if (self._bands > 1 and self._format != 'BAND_SEQUENTIAL'):
             raise NotImplementedError
         else:
-            self.data.tofile(stream, format='%' + self._sample_type[1])
+            self.data.tofile(stream, format='%' + self.dtype.kind)
         stream.close()
 
     @property
@@ -195,7 +221,10 @@ class PDS3Image(PlanetaryImage):
     @property
     def dtype(self):
         """Pixel data type."""
-        return numpy.dtype('%s%d' % (self._sample_type, self._sample_bytes))
+        try:
+            return self.data.dtype
+        except AttributeError:
+            return numpy.dtype('%s%d' % (self._sample_type, self._sample_bytes))
 
     @property
     def _decoder(self):
