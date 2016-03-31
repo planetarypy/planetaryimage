@@ -182,6 +182,22 @@ def test_image_save_float_to_int():
     os.remove('Temp_Image.IMG')
 
 
+def test_numpy_array_save():
+    image = PDS3Image.open(filename)
+    temp = PDS3Image.open(image.data)
+    temp.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    assert image_temp.bands == image.bands
+    assert image_temp.lines == image.lines
+    assert image_temp.samples == image.samples
+    assert image_temp.format == image.format
+    assert image_temp.dtype == image.dtype
+    assert image_temp.shape == image.shape
+    assert image_temp.size == image.size
+    assert_almost_equal(image_temp.data, image.data)
+    os.remove('Temp_Image.IMG')
+
+
 def test_bz2_pds3_1band_labels(expected):
     image = PDS3Image.open(bz2_filename)
     assert image.filename == bz2_filename
