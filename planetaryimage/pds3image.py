@@ -165,6 +165,58 @@ class PDS3Image(PlanetaryImage):
             self.data.tofile(stream, format='%' + self.dtype.kind)
         stream.close()
 
+    def _create_label(self, array):
+        if len(array.shape) == 3:
+            bands = array.shape[0]
+            lines = array.shape[1]
+            line_samples = array.shape[2]
+        else:
+            bands = 1
+            lines = array.shape[0]
+            line_samples = array.shape[1]
+        record_bytes = line_samples * array.itemsize
+        label_module = pvl.PVLModule([
+            ('PDS_VERSION_ID', 'PDS3'),
+            ('RECORD_TYPE', 'FIXED_LENGTH'),
+            ('RECORD_BYTES', record_bytes),
+            ('LABEL_RECORDS', 1),
+            ('^IMAGE', 1),
+            ('IMAGE',
+                {'BANDS': bands,
+                 'LINES': lines,
+                 'LINE_SAMPLES': line_samples,
+                 'MAXIMUM': 0,
+                 'MEAN': 0,
+                 'MEDIAN': 0,
+                 'MINIMUM': 0,
+                 'SAMPLE_BITS': array.itemsize * 8,
+                 'SAMPLE_TYPE': 'MSB_INTEGER',
+                 'STANDARD_DEVIATION': 0})
+            ])
+        return self._update_label(label_module, array)
+
+    def _update_label(self, label, array):
+        maximum = float(numpy.max(array))
+        mean = numpy.mean(array)
+        median = numpy.median(array)
+        minimum = float(numpy.min(array))
+        stdev = numpy.std(array, ddof=1)
+
+        encoder = pvl.encoder.PDSLabelEncoder
+        serial_label = pvl.dumps(label, cls=encoder)
+        label_sz = len(serial_label)
+        image_pointer = int(label_sz / label['RECORD_BYTES']) + 1
+
+        label['^IMAGE'] = image_pointer + 1
+        label['LABEL_RECORDS'] = image_pointer
+        label['IMAGE']['MEAN'] = mean
+        label['IMAGE']['MAXIMUM'] = maximum
+        label['IMAGE']['MEDIAN'] = median
+        label['IMAGE']['MINIMUM'] = minimum
+        label['IMAGE']['STANDARD_DEVIATION'] = stdev
+
+        return label
+
     @property
     def _bands(self):
         return self.label['IMAGE'].get('BANDS', 1)
