@@ -136,7 +136,7 @@ class PDS3Image(PlanetaryImage):
         image_pointer = int(label_sz / self.label['RECORD_BYTES']) + 1
         self.label['^IMAGE'] = image_pointer + 1
 
-        if self._sample_bytes != self.data.itemsize:
+        if self._sample_bytes != self.label['IMAGE']['SAMPLE_BITS'] * 8:
             self.label['IMAGE']['SAMPLE_BITS'] = self.data.itemsize * 8
             sample_type_to_save = self.DTYPES[self._sample_type[0] + self.dtype.kind]
             self.label['IMAGE']['SAMPLE_TYPE'] = sample_type_to_save
@@ -167,15 +167,33 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def _bands(self):
-        return self.label['IMAGE'].get('BANDS', 1)
+        try:
+            if len(self.data.shape) == 3:
+                return self.data.shape[0]
+            else:
+                return 1
+        except AttributeError:
+            return self.label['IMAGE'].get('BANDS', 1)
 
     @property
     def _lines(self):
-        return self.label['IMAGE']['LINES']
+        try:
+            if len(self.data.shape) == 3:
+                return self.data.shape[1]
+            else:
+                return self.data.shape[0]
+        except AttributeError:
+            return self.label['IMAGE']['LINES']
 
     @property
     def _samples(self):
-        return self.label['IMAGE']['LINE_SAMPLES']
+        try:
+            if len(self.data.shape) == 3:
+                return self.data.shape[2]
+            else:
+                return self.data.shape[1]
+        except AttributeError:
+            return self.label['IMAGE']['LINE_SAMPLES']
 
     @property
     def _format(self):
@@ -213,7 +231,10 @@ class PDS3Image(PlanetaryImage):
     @property
     def _sample_bytes(self):
         # get bytes to match NumPy dtype expressions
-        return int(self.label['IMAGE']['SAMPLE_BITS'] / 8)
+        try:
+            return self.data.itemsize
+        except AttributeError:
+            return int(self.label['IMAGE']['SAMPLE_BITS'] / 8)
 
     # FIXME:  This dtype overrides the Image.dtype right?  Then whats the point
     # of _dtype above here ^^, should we just rename this one _dtype and remove
