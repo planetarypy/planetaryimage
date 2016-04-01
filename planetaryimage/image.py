@@ -21,7 +21,11 @@ class PlanetaryImage(object):
             (``.gz``) or bzip2 (``.bz2``) compressed.
         """
         if isinstance(filename, numpy.ndarray):
-            return cls(filename, 'numpy_array')
+            error_msg = (
+                'A file like object is expected for stream. '
+                'Use PDS3Image(numpy_array) to create a PDS3Image object.'
+            )
+            raise TypeError(error_msg)
         else:
             if filename.endswith('.gz'):
                 fp = gzip.open(filename, 'rb')
@@ -39,7 +43,7 @@ class PlanetaryImage(object):
                 with open(filename, 'rb') as fp:
                     return cls(fp, filename)
 
-    def __init__(self, stream_or_array, filename=None, compression=None):
+    def __init__(self, stream_string_or_array, filename=None, compression=None):
         """Create an Image object.
 
         Parameters
@@ -54,18 +58,18 @@ class PlanetaryImage(object):
         compression : string
             an optional string that indicate the compression type 'bz2' or 'gz'
         """
-        if isinstance(stream_or_array, six.string_types):
+        if isinstance(stream_string_or_array, six.string_types):
             error_msg = (
                 'A file like object is expected for stream. '
                 'Use %s.open(filename) to open a image file.'
             )
             raise TypeError(error_msg % type(self).__name__)
 
-        if isinstance(stream_or_array, numpy.ndarray):
+        if isinstance(stream_string_or_array, numpy.ndarray):
             self.filename = 'numpy_array'
             self.compression = None
-            self.data = stream_or_array
-            self.label = self._create_label(stream_or_array)
+            self.data = stream_string_or_array
+            self.label = self._create_label(stream_string_or_array)
         else:
             #: The filename if given, otherwise none.
             self.filename = filename
@@ -74,10 +78,10 @@ class PlanetaryImage(object):
 
             # TODO: rename to header and add footer?
             #: The parsed label header in dictionary form.
-            self.label = self._load_label(stream_or_array)
+            self.label = self._load_label(stream_string_or_array)
 
             #: A numpy array representing the image
-            self.data = self._load_data(stream_or_array)
+            self.data = self._load_data(stream_string_or_array)
 
     def __repr__(self):
         # TODO: pick a better repr

@@ -138,8 +138,9 @@ class PDS3Image(PlanetaryImage):
 
         if self._sample_bytes != self.data.itemsize:
             self.label['IMAGE']['SAMPLE_BITS'] = self.data.itemsize * 8
-            sample_type_to_save = self.DTYPES[self._sample_type[0] + self.dtype.kind]
-            self.label['IMAGE']['SAMPLE_TYPE'] = sample_type_to_save
+
+        sample_type_to_save = self.DTYPES[self._sample_type[0] + self.dtype.kind]
+        self.label['IMAGE']['SAMPLE_TYPE'] = sample_type_to_save
 
         if len(self.data.shape) == 3:
             self.label['IMAGE']['BANDS'] = self.data.shape[0]
@@ -197,10 +198,10 @@ class PDS3Image(PlanetaryImage):
 
     def _update_label(self, label, array):
         maximum = float(numpy.max(array))
-        mean = numpy.mean(array)
-        median = numpy.median(array)
+        mean = float(numpy.mean(array))
+        median = float(numpy.median(array))
         minimum = float(numpy.min(array))
-        stdev = numpy.std(array, ddof=1)
+        stdev = float(numpy.std(array, ddof=1))
 
         encoder = pvl.encoder.PDSLabelEncoder
         serial_label = pvl.dumps(label, cls=encoder)

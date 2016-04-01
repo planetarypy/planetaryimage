@@ -182,18 +182,40 @@ def test_image_save_float_to_int():
     os.remove('Temp_Image.IMG')
 
 
-def test_numpy_array_save():
+def test_numpy_array_save_i2():
     image = PDS3Image.open(filename)
-    temp = PDS3Image.open(image.data)
+    array = numpy.arange(100, dtype='>i2')
+    array = array.reshape(10, 10)
+    temp = PDS3Image(array)
     temp.save('Temp_Image.IMG')
     image_temp = PDS3Image.open('Temp_Image.IMG')
-    assert image_temp.bands == image.bands
-    assert image_temp.lines == image.lines
-    assert image_temp.samples == image.samples
-    assert image_temp.format == image.format
-    assert image_temp.dtype == image.dtype
-    assert image_temp.shape == image.shape
-    assert image_temp.size == image.size
+    assert image_temp.bands == 1
+    assert image_temp.lines == 10
+    assert image_temp.samples == 10
+    assert image_temp.format == 'BAND_SEQUENTIAL'
+    assert image_temp.dtype == '>i2'
+    assert image_temp.shape == (1, 10, 10)
+    assert image_temp.size == 100
+    assert_almost_equal(image_temp.data, image.data)
+    os.remove('Temp_Image.IMG')
+
+
+def test_numpy_array_save_f4():
+    image = PDS3Image.open(filename_float)
+    array = numpy.arange(100)
+    array = array.reshape(10, 10)
+    array = array * 1.5
+    array = array.astype('>f4')
+    temp = PDS3Image(array)
+    temp.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    assert image_temp.bands == 1
+    assert image_temp.lines == 10
+    assert image_temp.samples == 10
+    assert image_temp.format == 'BAND_SEQUENTIAL'
+    assert image_temp.dtype == '>f4'
+    assert image_temp.shape == (1, 10, 10)
+    assert image_temp.size == 100
     assert_almost_equal(image_temp.data, image.data)
     os.remove('Temp_Image.IMG')
 
