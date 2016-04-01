@@ -186,9 +186,11 @@ class PDS3Image(PlanetaryImage):
         It is called by 'image.py' to create PDS3Image object
         from Numpy Array.
 
-        Examples
-        --------
-        >>> self.label = _create_label(array)
+        Returns
+        -------
+        PVLModule label for the given NumPy array.
+
+        Usage: self.label = _create_label(array)
 
         """
         if len(array.shape) == 3:
@@ -222,16 +224,18 @@ class PDS3Image(PlanetaryImage):
 
     def _update_label(self, label, array):
         """Update PDS3 label for NumPy Array.
-        It is called by '_create_label' to update label values.
-        e.g.
+        It is called by '_create_label' to update label values
+        such as,
         - ^IMAGE, RECORD_BYTES
         - STANDARD_DEVIATION
         - MAXIMUM, MINIMUM
         - MEDIAN, MEAN
 
-        Examples
-        --------
-        >>> self.label = self._update_label(label, array)
+        Returns
+        -------
+        Update label module for the NumPy array.
+
+        Usage: self.label = self._update_label(label, array)
 
         """
         maximum = float(numpy.max(array))
