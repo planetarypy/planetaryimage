@@ -123,6 +123,21 @@ class PDS3Image(PlanetaryImage):
     }
 
     def _save(self, file_to_write, overwrite):
+        """Save PDS3Image object as PDS3 file.
+
+        Parameters
+        ----------
+        Overwrite: Use this keyword to save image with same filename.
+
+        Examples
+        --------
+
+        >>> from planetaryimage import PDS3Image
+        >>> image = PDS3Image.open('tests/mission_data/2p129641989eth0361p2600r8m1.img')
+        >>> image.save('temp.IMG')
+        >>> image.save('temp.IMG', overwrite=True)
+
+        """
         if overwrite:
             file_to_write = self.filename
         elif os.path.isfile(file_to_write):
@@ -167,6 +182,15 @@ class PDS3Image(PlanetaryImage):
         stream.close()
 
     def _create_label(self, array):
+        """Create sample PDS3 label for NumPy Array.
+        It is called by 'image.py' to create PDS3Image object
+        from Numpy Array.
+
+        Examples
+        --------
+        >>> self.label = _create_label(array)
+
+        """
         if len(array.shape) == 3:
             bands = array.shape[0]
             lines = array.shape[1]
@@ -197,6 +221,19 @@ class PDS3Image(PlanetaryImage):
         return self._update_label(label_module, array)
 
     def _update_label(self, label, array):
+        """Update PDS3 label for NumPy Array.
+        It is called by '_create_label' to update label values.
+        e.g.
+        - ^IMAGE, RECORD_BYTES
+        - STANDARD_DEVIATION
+        - MAXIMUM, MINIMUM
+        - MEDIAN, MEAN
+
+        Examples
+        --------
+        >>> self.label = self._update_label(label, array)
+
+        """
         maximum = float(numpy.max(array))
         mean = float(numpy.mean(array))
         median = float(numpy.median(array))

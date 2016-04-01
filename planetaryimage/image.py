@@ -20,28 +20,21 @@ class PlanetaryImage(object):
             Name of file to read as an image file.  This file may be gzip
             (``.gz``) or bzip2 (``.bz2``) compressed.
         """
-        if isinstance(filename, numpy.ndarray):
-            error_msg = (
-                'A file like object is expected for stream. '
-                'Use PDS3Image(numpy_array) to create a PDS3Image object.'
-            )
-            raise TypeError(error_msg)
+        if filename.endswith('.gz'):
+            fp = gzip.open(filename, 'rb')
+            try:
+                return cls(fp, filename, compression='gz')
+            finally:
+                fp.close()
+        elif filename.endswith('.bz2'):
+            fp = bz2.BZ2File(filename, 'rb')
+            try:
+                return cls(fp, filename, compression='bz2')
+            finally:
+                fp.close()
         else:
-            if filename.endswith('.gz'):
-                fp = gzip.open(filename, 'rb')
-                try:
-                    return cls(fp, filename, compression='gz')
-                finally:
-                    fp.close()
-            elif filename.endswith('.bz2'):
-                fp = bz2.BZ2File(filename, 'rb')
-                try:
-                    return cls(fp, filename, compression='bz2')
-                finally:
-                    fp.close()
-            else:
-                with open(filename, 'rb') as fp:
-                    return cls(fp, filename)
+            with open(filename, 'rb') as fp:
+                return cls(fp, filename)
 
     def __init__(self, stream_string_or_array, filename=None, compression=None):
         """Create an Image object.
@@ -66,7 +59,7 @@ class PlanetaryImage(object):
             raise TypeError(error_msg % type(self).__name__)
 
         if isinstance(stream_string_or_array, numpy.ndarray):
-            self.filename = 'numpy_array'
+            self.filename = None
             self.compression = None
             self.data = stream_string_or_array
             self.label = self._create_label(stream_string_or_array)
