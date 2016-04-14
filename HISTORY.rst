@@ -3,6 +3,12 @@
 History
 -------
 
+0.5.0 (2016-04-13)
+---------------------
+
+* Added ability to generate PDS3Image objects from NumPy arrays.
+
+
 0.4.1 (2016-03-26)
 ---------------------
 
