@@ -127,15 +127,10 @@ class PDS3Image(PlanetaryImage):
 
         Parameters
         ----------
+        filename: Set filename for the pds image to be saved.
         Overwrite: Use this keyword to save image with same filename.
 
-        Examples
-        --------
-
-        >>> from planetaryimage import PDS3Image
-        >>> image = PDS3Image.open('tests/mission_data/2p129641989eth0361p2600r8m1.img')
-        >>> image.save('temp.IMG')
-        >>> image.save('temp.IMG', overwrite=True)
+        Usage: image.save('temp.IMG', overwrite=True)
 
         """
         if overwrite:
