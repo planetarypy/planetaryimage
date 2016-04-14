@@ -123,6 +123,21 @@ class PDS3Image(PlanetaryImage):
     }
 
     def _save(self, file_to_write, overwrite):
+        """Save PDS3Image object as PDS3 file.
+
+        Parameters
+        ----------
+        Overwrite: Use this keyword to save image with same filename.
+
+        Examples
+        --------
+
+        >>> from planetaryimage import PDS3Image
+        >>> image = PDS3Image.open('tests/mission_data/2p129641989eth0361p2600r8m1.img')
+        >>> image.save('temp.IMG')
+        >>> image.save('temp.IMG', overwrite=True)
+
+        """
         if overwrite:
             file_to_write = self.filename
         elif os.path.isfile(file_to_write):
@@ -138,8 +153,9 @@ class PDS3Image(PlanetaryImage):
 
         if self._sample_bytes != self.label['IMAGE']['SAMPLE_BITS'] * 8:
             self.label['IMAGE']['SAMPLE_BITS'] = self.data.itemsize * 8
-            sample_type_to_save = self.DTYPES[self._sample_type[0] + self.dtype.kind]
-            self.label['IMAGE']['SAMPLE_TYPE'] = sample_type_to_save
+
+        sample_type_to_save = self.DTYPES[self._sample_type[0] + self.dtype.kind]
+        self.label['IMAGE']['SAMPLE_TYPE'] = sample_type_to_save
 
         if len(self.data.shape) == 3:
             self.label['IMAGE']['BANDS'] = self.data.shape[0]
@@ -164,6 +180,84 @@ class PDS3Image(PlanetaryImage):
         else:
             self.data.tofile(stream, format='%' + self.dtype.kind)
         stream.close()
+
+    def _create_label(self, array):
+        """Create sample PDS3 label for NumPy Array.
+        It is called by 'image.py' to create PDS3Image object
+        from Numpy Array.
+
+        Returns
+        -------
+        PVLModule label for the given NumPy array.
+
+        Usage: self.label = _create_label(array)
+
+        """
+        if len(array.shape) == 3:
+            bands = array.shape[0]
+            lines = array.shape[1]
+            line_samples = array.shape[2]
+        else:
+            bands = 1
+            lines = array.shape[0]
+            line_samples = array.shape[1]
+        record_bytes = line_samples * array.itemsize
+        label_module = pvl.PVLModule([
+            ('PDS_VERSION_ID', 'PDS3'),
+            ('RECORD_TYPE', 'FIXED_LENGTH'),
+            ('RECORD_BYTES', record_bytes),
+            ('LABEL_RECORDS', 1),
+            ('^IMAGE', 1),
+            ('IMAGE',
+                {'BANDS': bands,
+                 'LINES': lines,
+                 'LINE_SAMPLES': line_samples,
+                 'MAXIMUM': 0,
+                 'MEAN': 0,
+                 'MEDIAN': 0,
+                 'MINIMUM': 0,
+                 'SAMPLE_BITS': array.itemsize * 8,
+                 'SAMPLE_TYPE': 'MSB_INTEGER',
+                 'STANDARD_DEVIATION': 0})
+            ])
+        return self._update_label(label_module, array)
+
+    def _update_label(self, label, array):
+        """Update PDS3 label for NumPy Array.
+        It is called by '_create_label' to update label values
+        such as,
+        - ^IMAGE, RECORD_BYTES
+        - STANDARD_DEVIATION
+        - MAXIMUM, MINIMUM
+        - MEDIAN, MEAN
+
+        Returns
+        -------
+        Update label module for the NumPy array.
+
+        Usage: self.label = self._update_label(label, array)
+
+        """
+        maximum = float(numpy.max(array))
+        mean = float(numpy.mean(array))
+        median = float(numpy.median(array))
+        minimum = float(numpy.min(array))
+        stdev = float(numpy.std(array, ddof=1))
+
+        encoder = pvl.encoder.PDSLabelEncoder
+        serial_label = pvl.dumps(label, cls=encoder)
+        label_sz = len(serial_label)
+        image_pointer = int(label_sz / label['RECORD_BYTES']) + 1
+
+        label['^IMAGE'] = image_pointer + 1
+        label['LABEL_RECORDS'] = image_pointer
+        label['IMAGE']['MEAN'] = mean
+        label['IMAGE']['MAXIMUM'] = maximum
+        label['IMAGE']['MEDIAN'] = median
+        label['IMAGE']['MINIMUM'] = minimum
+        label['IMAGE']['STANDARD_DEVIATION'] = stdev
+
+        return label
 
     @property
     def _bands(self):

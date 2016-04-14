@@ -182,6 +182,42 @@ def test_image_save_float_to_int():
     os.remove('Temp_Image.IMG')
 
 
+def test_numpy_array_save_i2():
+    array = numpy.arange(100, dtype='>i2')
+    array = array.reshape(1, 10, 10)
+    temp = PDS3Image(array)
+    temp.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    assert image_temp.bands == 1
+    assert image_temp.lines == 10
+    assert image_temp.samples == 10
+    assert image_temp.format == 'BAND_SEQUENTIAL'
+    assert image_temp.dtype == '>i2'
+    assert image_temp.shape == (1, 10, 10)
+    assert image_temp.size == 100
+    assert_almost_equal(image_temp.data, array)
+    os.remove('Temp_Image.IMG')
+
+
+def test_numpy_array_save_f4():
+    array = numpy.arange(100)
+    array = array.reshape(1, 10, 10)
+    array = array * 1.5
+    array = array.astype('>f4')
+    temp = PDS3Image(array)
+    temp.save('Temp_Image.IMG')
+    image_temp = PDS3Image.open('Temp_Image.IMG')
+    assert image_temp.bands == 1
+    assert image_temp.lines == 10
+    assert image_temp.samples == 10
+    assert image_temp.format == 'BAND_SEQUENTIAL'
+    assert image_temp.dtype == '>f4'
+    assert image_temp.shape == (1, 10, 10)
+    assert image_temp.size == 100
+    assert_almost_equal(image_temp.data, array)
+    os.remove('Temp_Image.IMG')
+
+
 def test_bz2_pds3_1band_labels(expected):
     image = PDS3Image.open(bz2_filename)
     assert image.filename == bz2_filename

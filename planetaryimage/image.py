@@ -36,7 +36,7 @@ class PlanetaryImage(object):
             with open(filename, 'rb') as fp:
                 return cls(fp, filename)
 
-    def __init__(self, stream, filename=None, compression=None):
+    def __init__(self, stream_string_or_array, filename=None, compression=None):
         """Create an Image object.
 
         Parameters
@@ -51,24 +51,30 @@ class PlanetaryImage(object):
         compression : string
             an optional string that indicate the compression type 'bz2' or 'gz'
         """
-        if isinstance(stream, six.string_types):
+        if isinstance(stream_string_or_array, six.string_types):
             error_msg = (
                 'A file like object is expected for stream. '
                 'Use %s.open(filename) to open a image file.'
             )
             raise TypeError(error_msg % type(self).__name__)
 
-        #: The filename if given, otherwise none.
-        self.filename = filename
+        if isinstance(stream_string_or_array, numpy.ndarray):
+            self.filename = None
+            self.compression = None
+            self.data = stream_string_or_array
+            self.label = self._create_label(stream_string_or_array)
+        else:
+            #: The filename if given, otherwise none.
+            self.filename = filename
 
-        self.compression = compression
+            self.compression = compression
 
-        # TODO: rename to header and add footer?
-        #: The parsed label header in dictionary form.
-        self.label = self._load_label(stream)
+            # TODO: rename to header and add footer?
+            #: The parsed label header in dictionary form.
+            self.label = self._load_label(stream_string_or_array)
 
-        #: A numpy array representing the image
-        self.data = self._load_data(stream)
+            #: A numpy array representing the image
+            self.data = self._load_data(stream_string_or_array)
 
     def __repr__(self):
         # TODO: pick a better repr
@@ -154,6 +160,9 @@ class PlanetaryImage(object):
 
         stream.seek(self.start_byte)
         return self._decode(stream)
+
+    def create_label(self, array):
+        self._create_label(array)
 
     def _decode(self, stream):
         return self._decoder.decode(stream)
