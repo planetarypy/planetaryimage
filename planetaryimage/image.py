@@ -112,7 +112,7 @@ class PlanetaryImage(object):
          >>> import matplotlib.pyplot as plt
          >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
          >>> image = PDS3Image.open(testfile)
-         >>> _ = plt.imshow(image.image, cmap='gray')
+         >>> plt.imshow(image.image, cmap='gray')
         """
         if self.bands == 1:
             return self.data.squeeze()
@@ -122,84 +122,49 @@ class PlanetaryImage(object):
 
     @property
     def bands(self):
-        """Number of image bands.
-
-          >>> image.bands
-          1
-        """
+        """Number of image bands."""
         return self._bands
 
     @property
     def lines(self):
-        """Number of lines per band.
-
-          >>> image.lines
-          64
-        """
+        """Number of lines per band."""
         return self._lines
 
     @property
     def samples(self):
-        """Number of samples per line.
-
-          >>> image.samples
-          64
-        """
+        """Number of samples per line."""
         return self._samples
 
     @property
     def format(self):
-        """Image format.
-
-          >>> image.format
-          'BAND_SEQUENTIAL'"""
+        """Image format."""
         return self._format
 
     _data_filename = None
 
     @property
     def data_filename(self):
-        """Return detached filename else None.
-
-          >>> image.data_filename
-
-        """
+        """Return detached filename else None."""
         return self._data_filename
 
     @property
     def dtype(self):
-        """Pixel data type.
-
-          >>> image.dtype
-          dtype('>i2')
-        """
+        """Pixel data type."""
         return self._dtype
 
     @property
     def start_byte(self):
-        """Index of the start of the image data (zero indexed).
-
-          >>> image.start_byte
-          34304
-        """
+        """Index of the start of the image data (zero indexed)."""
         return self._start_byte
 
     @property
     def shape(self):
-        """Tuple of images bands, lines and samples.
-
-          >>> image.shape
-          (1, 64, 64)
-        """
+        """Tuple of images bands, lines and samples."""
         return (self.bands, self.lines, self.samples)
 
     @property
     def size(self):
-        """Total number of pixels
-
-          >>> image.size
-          4096
-        """
+        """Total number of pixels"""
         return self.bands * self.lines * self.samples
 
     def _load_label(self, stream):

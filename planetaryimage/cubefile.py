@@ -7,16 +7,7 @@ from .decoders import BandSequentialDecoder, TileDecoder
 
 
 class CubeFile(PlanetaryImage):
-    """A Isis Cube file reader.
-
-    Examples
-    --------
-
-    >>> from planetaryimage import CubeFile
-    >>> image = CubeFile.open('tests/data/pattern.cub')
-    >>> image.label['IsisCube']['Core']['Format']
-    'Tile'
-    """
+    """A Isis Cube file reader."""
 
     PIXEL_TYPES = {
         'UnsignedByte': numpy.dtype('uint8'),
@@ -69,51 +60,31 @@ class CubeFile(PlanetaryImage):
 
     @property
     def base(self):
-        """An additive factor by which to offset pixel DN.
-
-          >>> iamge.base
-          0.0
-        """
+        """An additive factor by which to offset pixel DN."""
         return self.label['IsisCube']['Core']['Pixels']['Base']
 
     @property
     def multiplier(self):
-        """A multiplicative factor by which to scale pixel DN.
-
-          >>> image.multiplier
-          1.0
-        """
+        """A multiplicative factor by which to scale pixel DN."""
         return self.label['IsisCube']['Core']['Pixels']['Multiplier']
 
     @property
     def tile_lines(self):
-        """Number of lines per tile.
-
-          >>> image.tile_lines
-          128
-        """
+        """Number of lines per tile."""
         if self.format != 'Tile':
             return None
         return self.label['IsisCube']['Core']['TileLines']
 
     @property
     def tile_samples(self):
-        """Number of samples per tile.
-
-          >>> image.tile_samples
-          128
-        """
+        """Number of samples per tile."""
         if self.format != 'Tile':
             return None
         return self.label['IsisCube']['Core']['TileSamples']
 
     @property
     def tile_shape(self):
-        """Shape of tiles.
-
-          >>> image.tile_shape
-          (128, 128)
-        """
+        """Shape of tiles."""
         if self.format != 'Tile':
             return None
         return (self.tile_lines, self.tile_samples)
@@ -132,27 +103,13 @@ class CubeFile(PlanetaryImage):
 
     @property
     def specials(self):
-        """Return the special pixel values
-
-          >>> image.specials
-          {'His': -3.4028233e+38,
-           'Hrs': -3.4028235e+38,
-           'Lis': -3.4028231e+38,
-           'Lrs': -3.4028229e+38,
-           'Max': 3.4028235e+38,
-           'Min': -3.4028225e+38,
-           'Null': -3.4028227e+38}
-        """
+        """Return the special pixel values"""
         pixel_type = self._pixels_group['Type']
         return self.SPECIAL_PIXELS[pixel_type]
 
     @property
     def data_filename(self):
-        """Return detached filename else None.
-
-          >>> image.data_filename
-
-        """
+        """Return detached filename else None."""
         return self.label['IsisCube']['Core'].get('^Core')
 
     def apply_scaling(self, copy=True):
