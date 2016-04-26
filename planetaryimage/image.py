@@ -138,7 +138,7 @@ class PlanetaryImage(object):
          >>> import matplotlib.pyplot as plt
          >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
          >>> image = PDS3Image.open(testfile)
-         >>> plt.imshow(image.image, cmap='gray')
+         >>> # plt.imshow(image.image, cmap='gray')
         """
         if self.bands == 1:
             return self.data.squeeze()
