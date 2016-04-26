@@ -34,13 +34,12 @@ Gather the Images::
  >>> pdsfiles = glob("*.*")
  >>> images = []
  >>> for pdsfile in pdsfiles:
-        try:
-            images.append(PDS3Image.open(pdsfile))
-            print pdsfile
-        except:
-            pass
+ ...    try:
+ ...        images.append(PDS3Image.open(pdsfile))
+ ...    except:
+ ...        pass
  >>> for n, image in enumerate(images):
-        print n, image
+ ...    print n, image
  0 1p190678905erp64kcp2600l8c1.img
  1 mk19s259.img
  2 m0002320.imq
@@ -57,7 +56,7 @@ number to use in future use of the image.
 To see the information about each image::
 
  >>> for i in images:
-        print i.data.dtype, i.data.shape, i.shape
+ ...    print i.data.dtype, i.data.shape, i.shape
  >i2 (1, 1024, 32) (1, 1024, 32)
  uint8 (1, 1331, 1328) (1, 1331, 1328)
  uint8 (1, 1600, 384) (1, 1600, 384)
@@ -70,6 +69,7 @@ To display a three band, color, image::
  >>> caltarget = images[5]
  >>> plt.imshow(caltarget.image)
  <matplotlib.image.AxesImage at 0x10a13c250>
+
 .. image:: Image_examples/caltarget_1.png
 
 It is important to look at the first number in ``i.shape`` (See attributes) or
@@ -81,6 +81,7 @@ To display a single band, grayscale, image::
  >>> image1 = images[1]
  >>> plt.imshow(image1.image, cmap='gray')
  <matplotlib.image.AxesImage at 0x125817a50>
+
 .. image:: Image_examples/output_3_1.png
 
 The ``cmap`` keyword argument defines which ``colormap`` a grayscale image
@@ -93,6 +94,7 @@ To see a subframe of an image::
 
  >>> plt.imshow(image1.image[370:620, 0:250], cmap = 'gray')
  <matplotlib.image.AxesImage at 0x11c014450>
+
 .. image:: Image_examples/output_4_1.png
 
 To see the different bands of a colored image::
@@ -103,6 +105,7 @@ To see the different bands of a colored image::
         mcam1.image[700:1100, 600:1000, 2],
     ]), cmap='gray')
  <matplotlib.image.AxesImage at 0x10fccd210>
+
 .. image:: Image_examples/caltarget_2.png
 
 To save an image as a `.png` file for later viewing::
@@ -138,4 +141,5 @@ You can also use planetaryimage to process Isis Cube Files::
  (dtype('<f4'), (90, 90), (1, 90, 90))
  >>> plt.imshow(isisimage.image, cmap='gray')
  <matplotlib.image.AxesImage at 0x114010610>
+
 .. image:: Image_examples/Isisimage.png
