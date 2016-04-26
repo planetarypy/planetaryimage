@@ -8,7 +8,34 @@ import numpy
 
 
 class PlanetaryImage(object):
-    """A generic image reader. """
+    """A generic image reader. Parent object for PDS3Image and CubeFile
+
+        Parameters
+        ----------
+
+        stream
+            file object to read as an image file
+
+        filename : string
+            an optional filename to attach to the object
+
+        compression : string
+            an optional string that indicate the compression type 'bz2' or 'gz'
+
+        Attributes
+        ----------
+        compression : string
+            Compression type (i.e. 'gz', 'bz2', or None).
+
+        data : numpy array
+            A numpy array representing the image.
+
+        filename : string
+            The filename given.
+
+        label : pvl module
+            The image's label in dictionary form.
+    """
 
     @classmethod
     def open(cls, filename):
@@ -37,19 +64,8 @@ class PlanetaryImage(object):
                 return cls(fp, filename)
 
     def __init__(self, stream_string_or_array, filename=None, compression=None):
-        """Create an Image object.
-
-        Parameters
-        ----------
-
-        stream
-            file object to read as an image file
-
-        filename : string
-            an optional filename to attach to the object
-
-        compression : string
-            an optional string that indicate the compression type 'bz2' or 'gz'
+        """
+        Create an Image object.
         """
         if isinstance(stream_string_or_array, six.string_types):
             error_msg = (
@@ -106,49 +122,84 @@ class PlanetaryImage(object):
 
     @property
     def bands(self):
-        """Number of image bands."""
+        """Number of image bands.
+
+          >>> image.bands
+          1
+        """
         return self._bands
 
     @property
     def lines(self):
-        """Number of lines per band."""
+        """Number of lines per band.
+
+          >>> image.lines
+          64
+        """
         return self._lines
 
     @property
     def samples(self):
-        """Number of samples per line."""
+        """Number of samples per line.
+
+          >>> image.samples
+          64
+        """
         return self._samples
 
     @property
     def format(self):
-        """Image format."""
+        """Image format.
+
+          >>> image.format
+          'BAND_SEQUENTIAL'"""
         return self._format
 
     _data_filename = None
 
     @property
     def data_filename(self):
-        """Return detached filename else None."""
+        """Return detached filename else None.
+
+          >>> image.data_filename
+
+        """
         return self._data_filename
 
     @property
     def dtype(self):
-        """Pixel data type."""
+        """Pixel data type.
+
+          >>> image.dtype
+          dtype('>i2')
+        """
         return self._dtype
 
     @property
     def start_byte(self):
-        """Index of the start of the image data (zero indexed)."""
+        """Index of the start of the image data (zero indexed).
+
+          >>> image.start_byte
+          34304
+        """
         return self._start_byte
 
     @property
     def shape(self):
-        """Tuple of images bands, lines and samples."""
+        """Tuple of images bands, lines and samples.
+
+          >>> image.shape
+          (1, 64, 64)
+        """
         return (self.bands, self.lines, self.samples)
 
     @property
     def size(self):
-        """Total number of pixels."""
+        """Total number of pixels
+
+          >>> image.size
+          4096
+        """
         return self.bands * self.lines * self.samples
 
     def _load_label(self, stream):

@@ -7,7 +7,16 @@ from .decoders import BandSequentialDecoder, TileDecoder
 
 
 class CubeFile(PlanetaryImage):
-    """A Isis Cube file reader."""
+    """A Isis Cube file reader.
+
+    Examples
+    --------
+
+    >>> from planetaryimage import CubeFile
+    >>> image = CubeFile.open('tests/data/pattern.cub')
+    >>> image.label['IsisCube']['Core']['Format']
+    'Tile'
+    """
 
     PIXEL_TYPES = {
         'UnsignedByte': numpy.dtype('uint8'),
@@ -60,31 +69,51 @@ class CubeFile(PlanetaryImage):
 
     @property
     def base(self):
-        """An additive factor by which to offset pixel DN."""
+        """An additive factor by which to offset pixel DN.
+
+          >>> iamge.base
+          0.0
+        """
         return self.label['IsisCube']['Core']['Pixels']['Base']
 
     @property
     def multiplier(self):
-        """A multiplicative factor by which to scale pixel DN."""
+        """A multiplicative factor by which to scale pixel DN.
+
+          >>> image.multiplier
+          1.0
+        """
         return self.label['IsisCube']['Core']['Pixels']['Multiplier']
 
     @property
     def tile_lines(self):
-        """Number of lines per tile."""
+        """Number of lines per tile.
+
+          >>> image.tile_lines
+          128
+        """
         if self.format != 'Tile':
             return None
         return self.label['IsisCube']['Core']['TileLines']
 
     @property
     def tile_samples(self):
-        """Number of samples per tile."""
+        """Number of samples per tile.
+
+          >>> image.tile_samples
+          128
+        """
         if self.format != 'Tile':
             return None
         return self.label['IsisCube']['Core']['TileSamples']
 
     @property
     def tile_shape(self):
-        """Shape of tiles."""
+        """Shape of tiles.
+
+          >>> image.tile_shape
+          (128, 128)
+        """
         if self.format != 'Tile':
             return None
         return (self.tile_lines, self.tile_samples)
@@ -103,21 +132,43 @@ class CubeFile(PlanetaryImage):
 
     @property
     def specials(self):
+        """Return the special pixel values
+
+          >>> image.specials
+          {'His': -3.4028233e+38,
+           'Hrs': -3.4028235e+38,
+           'Lis': -3.4028231e+38,
+           'Lrs': -3.4028229e+38,
+           'Max': 3.4028235e+38,
+           'Min': -3.4028225e+38,
+           'Null': -3.4028227e+38}
+        """
         pixel_type = self._pixels_group['Type']
         return self.SPECIAL_PIXELS[pixel_type]
 
     @property
     def data_filename(self):
-        """Return detached filename else None."""
+        """Return detached filename else None.
+
+          >>> image.data_filename
+
+        """
         return self.label['IsisCube']['Core'].get('^Core')
 
     def apply_scaling(self, copy=True):
         """Scale pixel values to there true DN.
 
-        :param copy: whether to apply the scalling to a copy of the pixel data
-            and leave the orginial unaffected
+        Parameters
+        ----------
+        copy: bool [True]
+            Whether to apply the scaling to a copy of the pixel data
+            and leave the original unaffected
 
-        :returns: a scalled version of the pixel data
+        Returns
+        -------
+        Numpy Array
+            A scaled version of the pixel data
+
         """
         if copy:
             return self.multiplier * self.data + self.base
@@ -143,11 +194,17 @@ class CubeFile(PlanetaryImage):
             Hrs      inf
             =======  =======
 
-        :param copy: whether to apply the new special values to a copy of the
-            pixel data and leave the orginial unaffected
+        Parameters
+        ----------
+        copy : bool [True]
+            Whether to apply the new special values to a copy of the
+            pixel data and leave the original unaffected
 
-        :returns: a numpy array with special values converted to numpy's nan,
-            inf and -inf
+        Returns
+        -------
+        Numpy Array
+            A numpy array with special values converted to numpy's nan, inf,
+            and -inf
         """
         if copy:
             data = self.data.astype(numpy.float64)
@@ -167,8 +224,10 @@ class CubeFile(PlanetaryImage):
     def specials_mask(self):
         """Create a pixel map for special pixels.
 
-        :returns: an array where the value is `False` if the pixel is special
-            and `True` otherwise
+        Returns
+        -------
+        An array where the value is `False` if the pixel is special
+        and `True` otherwise
         """
         mask = self.data >= self.specials['Min']
         mask &= self.data <= self.specials['Max']
@@ -193,7 +252,8 @@ class CubeFile(PlanetaryImage):
             # Save the first band to a new file
             Image.fromarray(data[0]).save('test.png')
 
-        :returns:
+        Returns
+        -------
             A uint8 array of pixel values.
         """
         specials_mask = self.specials_mask()

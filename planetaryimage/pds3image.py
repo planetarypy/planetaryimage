@@ -61,6 +61,7 @@ class Pointer(collections.namedtuple('Pointer', ['filename', 'bytes'])):
 class PDS3Image(PlanetaryImage):
     """A PDS3 image reader.
 
+
     Examples
     --------
 
@@ -302,7 +303,11 @@ class PDS3Image(PlanetaryImage):
 
     @property
     def record_bytes(self):
-        """Number of bytes for fixed length records."""
+        """Number of bytes for fixed length records.
+
+          >>> image.record_bytes
+          128
+        """
         return self.label.get('RECORD_BYTES', 0)
 
     @property
@@ -330,7 +335,11 @@ class PDS3Image(PlanetaryImage):
     # the other one?
     @property
     def dtype(self):
-        """Pixel data type."""
+        """Pixel data type.
+
+          >>> image.dtype
+          dtype('>i2')
+        """
         try:
             return self.data.dtype
         except AttributeError:

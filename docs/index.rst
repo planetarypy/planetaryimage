@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to planetaryimage's documentation!
-======================================
+==========================================
 
 Contents:
 
@@ -14,6 +14,7 @@ Contents:
    readme
    installation
    usage
+   image
    supported_planetary_image_types
    contributing
    authors
