@@ -10,31 +10,57 @@ import numpy
 class PlanetaryImage(object):
     """A generic image reader. Parent object for PDS3Image and CubeFile
 
-        Parameters
-        ----------
+    Parameters
+    ----------
 
-        stream
-            file object to read as an image file
+    stream
+        file object to read as an image file
 
-        filename : string
-            an optional filename to attach to the object
+    filename : string
+        an optional filename to attach to the object
 
-        compression : string
-            an optional string that indicate the compression type 'bz2' or 'gz'
+    compression : string
+        an optional string that indicate the compression type 'bz2' or 'gz'
 
-        Attributes
-        ----------
-        compression : string
-            Compression type (i.e. 'gz', 'bz2', or None).
+    Attributes
+    ----------
+    compression : string
+        Compression type (i.e. 'gz', 'bz2', or None).
 
-        data : numpy array
-            A numpy array representing the image.
+    data : numpy array
+        A numpy array representing the image.
 
-        filename : string
-            The filename given.
+    filename : string
+        The filename given.
 
-        label : pvl module
-            The image's label in dictionary form.
+    label : pvl module
+        The image's label in dictionary form.
+
+    Examples
+    --------
+    >>> from planetaryimage import PDS3Image
+    >>> import matplotlib.pyplot as plt
+    >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
+    >>> image = PDS3Image.open(testfile)
+    >>> # Examples of attributes
+    >>> image.bands
+    1
+    >>> image.lines
+    64
+    >>> image.samples
+    64
+    >>> image.format
+    'BAND_SEQUENTIAL'
+    >>> image.data_filename
+    >>> image.dtype
+    dtype('>i2')
+    >>> image.start_byte
+    34304
+    >>> image.shape
+    (1, 64, 64)
+    >>> image.size
+    4096
+
     """
 
     @classmethod

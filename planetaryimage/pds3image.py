@@ -59,7 +59,23 @@ class Pointer(collections.namedtuple('Pointer', ['filename', 'bytes'])):
 
 
 class PDS3Image(PlanetaryImage):
-    """A PDS3 image reader."""
+    """A PDS3 image reader.
+
+    Examples
+    --------
+      >>> from planetaryimage import PDS3Image
+      >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
+      >>> image = PDS3Image.open(testfile)
+      >>> # Display image in plot
+      >>> plt.imshow(image.image, cmap='gray')
+      >>> # Examples of PDS3Image Attributes
+      >>> image.dtype
+      dtype('>i2')
+      >>> image.record_bytes
+      128
+      >>> image.data_filename
+
+    """
 
     SAMPLE_TYPES = {
         'MSB_INTEGER': '>i',
