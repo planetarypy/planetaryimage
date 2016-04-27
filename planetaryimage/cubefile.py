@@ -14,7 +14,7 @@ class CubeFile(PlanetaryImage):
       >>> from planetaryimage import CubeFile
       >>> image = CubeFile.open('tests/data/pattern.cub')
       >>> # Display image in plot
-      >>> plt.imshow(image.image, cmap='gray')
+      >>> # plt.imshow(image.image, cmap='gray')
       >>> # Examples of PDS3Image Attributes
       >>> image.base
       0.0
