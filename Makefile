@@ -42,7 +42,14 @@ test:
 	# the following test line should be used
 	# py.test --doctest-modules --ignore=setup.py --doctest-glob="docs/*rst"
 	get_mission_data
-	py.test --doctest-modules --ignore=setup.py
+	# Test python code
+	py.test tests --doctest-modules --ignore=setup.py
+	# Test docstrings
+	py.test --doctest-modules --ignore=setup.py planetaryimage
+	# Test docs
+	# The doc tests will fail due to how usage.rst is structured.
+	# py.test --doctest-modules --ignore=setup.py --doctest-glob="docs/*.rst" docs
+
 
 test-all:
 	tox
