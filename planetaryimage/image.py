@@ -48,7 +48,7 @@ class PlanetaryImage(object):
     64
     >>> image.samples
     64
-    >>> image.format
+    >>> str(image.format)
     'BAND_SEQUENTIAL'
     >>> image.data_filename
     >>> image.dtype
@@ -134,13 +134,11 @@ class PlanetaryImage(object):
         * 2D array for single band, grayscale image data
         * 3D array for three band, RGB image data
 
-        Enables working with ``self.data`` as if it were a PIL image::
+        Enables working with ``self.data`` as if it were a PIL image.
 
-         >>> from planetaryimage import PDS3Image
-         >>> import matplotlib.pyplot as plt
-         >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
-         >>> image = PDS3Image.open(testfile)
-         >>> # plt.imshow(image.image, cmap='gray')
+        See https://planetaryimage.readthedocs.io/en/latest/usage.html to see
+        how to open images to view them and make manipulations.
+
         """
         if self.bands == 1:
             return self.data.squeeze()
