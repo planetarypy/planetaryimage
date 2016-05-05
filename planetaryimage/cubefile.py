@@ -13,21 +13,13 @@ class CubeFile(PlanetaryImage):
     --------
       >>> from planetaryimage import CubeFile
       >>> image = CubeFile.open('tests/data/pattern.cub')
-      >>> # Display image in plot
-      >>> # plt.imshow(image.image, cmap='gray')
-      >>> # Examples of PDS3Image Attributes
+      >>> # Examples of CubeFile Attributes
       >>> image.base
       0.0
       >>> image.multiplier
       1.0
-      >>> image.specials
-      {'His': -3.4028233e+38,
-       'Hrs': -3.4028235e+38,
-       'Lis': -3.4028231e+38,
-       'Lrs': -3.4028229e+38,
-       'Max': 3.4028235e+38,
-       'Min': -3.4028225e+38,
-       'Null': -3.4028227e+38}
+      >>> image.specials['His']
+      -3.4028233e+38
       >>> image.tile_lines
       128
       >>> image.tile_samples

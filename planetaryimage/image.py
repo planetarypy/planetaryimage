@@ -39,7 +39,6 @@ class PlanetaryImage(object):
     Examples
     --------
     >>> from planetaryimage import PDS3Image
-    >>> import matplotlib.pyplot as plt
     >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
     >>> image = PDS3Image.open(testfile)
     >>> # Examples of attributes
@@ -60,6 +59,9 @@ class PlanetaryImage(object):
     (1, 64, 64)
     >>> image.size
     4096
+
+    See https://planetaryimage.readthedocs.io/en/latest/usage.html to see how
+    to open images to view them and make manipulations.
 
     """
 

@@ -66,8 +66,6 @@ class PDS3Image(PlanetaryImage):
       >>> from planetaryimage import PDS3Image
       >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
       >>> image = PDS3Image.open(testfile)
-      >>> # Display image in plot
-      >>> # plt.imshow(image.image, cmap='gray')
       >>> # Examples of PDS3Image Attributes
       >>> image.dtype
       dtype('>i2')

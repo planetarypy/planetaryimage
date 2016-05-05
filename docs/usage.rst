@@ -9,6 +9,7 @@ The example below shows how to use ``planetaryimage``'s ``PDS3Image`` class to
 open a PDS image, inspect it's label and display the image data::
 
  >>> from planetaryimage import PDS3Image
+ >>> import matplotlib.pyplot as plt
  >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
  >>> image = PDS3Image.open(testfile)
  >>> print(image.record_bytes)               # access attribute
