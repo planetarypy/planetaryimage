@@ -8,7 +8,62 @@ import numpy
 
 
 class PlanetaryImage(object):
-    """A generic image reader. """
+    """A generic image reader. Parent object for PDS3Image and CubeFile
+
+    Parameters
+    ----------
+
+    stream
+        file object to read as an image file
+
+    filename : string
+        an optional filename to attach to the object
+
+    compression : string
+        an optional string that indicate the compression type 'bz2' or 'gz'
+
+    Attributes
+    ----------
+    compression : string
+        Compression type (i.e. 'gz', 'bz2', or None).
+
+    data : numpy array
+        A numpy array representing the image.
+
+    filename : string
+        The filename given.
+
+    label : pvl module
+        The image's label in dictionary form.
+
+    Examples
+    --------
+    >>> from planetaryimage import PDS3Image
+    >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
+    >>> image = PDS3Image.open(testfile)
+    >>> # Examples of attributes
+    >>> image.bands
+    1
+    >>> image.lines
+    64
+    >>> image.samples
+    64
+    >>> str(image.format)
+    'BAND_SEQUENTIAL'
+    >>> image.data_filename
+    >>> image.dtype
+    dtype('>i2')
+    >>> image.start_byte
+    34304
+    >>> image.shape
+    (1, 64, 64)
+    >>> image.size
+    4096
+
+    See https://planetaryimage.readthedocs.io/en/latest/usage.html to see how
+    to open images to view them and make manipulations.
+
+    """
 
     @classmethod
     def open(cls, filename):
@@ -37,19 +92,8 @@ class PlanetaryImage(object):
                 return cls(fp, filename)
 
     def __init__(self, stream_string_or_array, filename=None, compression=None):
-        """Create an Image object.
-
-        Parameters
-        ----------
-
-        stream
-            file object to read as an image file
-
-        filename : string
-            an optional filename to attach to the object
-
-        compression : string
-            an optional string that indicate the compression type 'bz2' or 'gz'
+        """
+        Create an Image object.
         """
         if isinstance(stream_string_or_array, six.string_types):
             error_msg = (
@@ -90,13 +134,11 @@ class PlanetaryImage(object):
         * 2D array for single band, grayscale image data
         * 3D array for three band, RGB image data
 
-        Enables working with ``self.data`` as if it were a PIL image::
+        Enables working with ``self.data`` as if it were a PIL image.
 
-         >>> from planetaryimage import PDS3Image
-         >>> import matplotlib.pyplot as plt
-         >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
-         >>> image = PDS3Image.open(testfile)
-         >>> _ = plt.imshow(image.image, cmap='gray')
+        See https://planetaryimage.readthedocs.io/en/latest/usage.html to see
+        how to open images to view them and make manipulations.
+
         """
         if self.bands == 1:
             return self.data.squeeze()
@@ -148,7 +190,7 @@ class PlanetaryImage(object):
 
     @property
     def size(self):
-        """Total number of pixels."""
+        """Total number of pixels"""
         return self.bands * self.lines * self.samples
 
     def _load_label(self, stream):

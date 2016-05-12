@@ -63,11 +63,15 @@ class PDS3Image(PlanetaryImage):
 
     Examples
     --------
-
-    >>> from planetaryimage import PDS3Image
-    >>> image = PDS3Image.open('tests/mission_data/2p129641989eth0361p2600r8m1.img')
-    >>> image.label['IMAGE']['LINES']
-    64
+      >>> from planetaryimage import PDS3Image
+      >>> testfile = 'tests/mission_data/2p129641989eth0361p2600r8m1.img'
+      >>> image = PDS3Image.open(testfile)
+      >>> # Examples of PDS3Image Attributes
+      >>> image.dtype
+      dtype('>i2')
+      >>> image.record_bytes
+      128
+      >>> image.data_filename
 
     """
 
